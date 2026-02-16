@@ -1,0 +1,25 @@
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+}
+
+.admin-shortcut {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9999;
+  background: #0f2747;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(15, 39, 71, 0.28);
+}
+
+.admin-shortcut:hover {
+  background: #1f4d85;
+  color: #fff;
+}

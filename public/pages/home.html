@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biltronix Automotive - Expert Automotive Solutions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1d2d5b;
+            --secondary: #f00001;
+            --accent: #ff7a00;
+            --light: #f8fbff;
+            --dark: #141a2f;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #ffffff;
+        }
+        
+        .navbar {
+            background-color: #ffffff;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #e8edf3;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary) !important;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--primary) !important;
+            font-weight: 500;
+            margin: 0 8px;
+            transition: color 0.3s;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: #0f2747 !important;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #fff2f4 0%, #eef4ff 55%, #fff6ea 100%);
+            color: var(--primary);
+            padding: 70px 0 40px;
+            text-align: center;
+        }
+        
+        .hero-section h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .hero-main-carousel {
+            max-width: 1040px;
+            margin: 0 auto 18px;
+        }
+
+        .hero-main-carousel .carousel-item img {
+            height: 470px;
+            object-fit: cover;
+            border-radius: 20px;
+            filter: brightness(0.7);
+        }
+
+        .hero-main-carousel .carousel-caption {
+            bottom: 1.2rem;
+            left: 8%;
+            right: 8%;
+            background: linear-gradient(120deg, rgba(20, 26, 47, 0.75), rgba(240, 0, 1, 0.38));
+            border-radius: 14px;
+            padding: 18px 20px;
+        }
+
+        .hero-main-carousel .carousel-caption h2 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .hero-main-carousel .carousel-caption p {
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        .quick-categories {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .quick-cat-card {
+            background: #ffffff;
+            border: 1px solid #e4e9f2;
+            border-radius: 14px;
+            padding: 14px 14px;
+            text-align: left;
+            box-shadow: 0 8px 20px rgba(29, 45, 91, 0.08);
+        }
+
+        .quick-cat-card h5 {
+            margin: 6px 0 4px;
+            color: var(--primary);
+            font-size: 1.05rem;
+        }
+
+        .quick-cat-card p {
+            margin: 0;
+            color: #51607b;
+            font-size: 0.92rem;
+        }
+
+        .quick-cat-card i {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-radius: 40px;
+            box-shadow: 0 8px 20px rgba(240, 0, 1, 0.25);
+        }
+        
+        .btn-primary:hover {
+            background-color: #cb0001;
+            transform: translateY(-3px);
+        }
+
+        .btn-outline-light {
+            border-radius: 40px;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background-color: rgba(255,255,255,0.85);
+            font-weight: 600;
+        }
+
+        .btn-outline-light:hover {
+            background-color: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            margin: 15px auto;
+        }
+        
+        .service-card {
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 30px;
+            height: 100%;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .service-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .service-card .card-body {
+            padding: 25px;
+        }
+        
+        .testimonial-card {
+            background-color: var(--light);
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .booking-form {
+            background-color: var(--light);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0 20px;
+        }
+        
+        .footer-heading {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .social-icons a {
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            transition: color 0.3s;
+        }
+        
+        .social-icons a:hover {
+            color: var(--secondary);
+        }
+        
+        .contact-info {
+            margin-bottom: 10px;
+        }
+        
+        .contact-info i {
+            color: var(--secondary);
+            margin-right: 10px;
+        }
+
+        .floating-actions {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .floating-actions a {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            font-size: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            transition: transform 0.2s ease;
+        }
+
+        .floating-actions a:hover {
+            transform: translateY(-3px);
+            color: white;
+        }
+
+        .floating-store {
+            background-color: var(--secondary);
+        }
+
+        .floating-whatsapp {
+            background-color: #25D366;
+        }
+        
+        .feature-box {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+        
+        .feature-box:hover {
+            background-color: var(--light);
+            transform: translateY(-5px);
+        }
+        
+        .feature-box i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+        
+        .team-member {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .team-member img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 5px solid var(--light);
+        }
+        
+        .stats-section {
+            background: linear-gradient(120deg, var(--primary), #243f86);
+            color: white;
+            padding: 80px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        .top-bar {
+            background-color: var(--dark);
+            color: white;
+            padding: 10px 0;
+            font-size: 0.9rem;
+        }
+        
+        .top-bar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        
+        .top-bar a:hover {
+            color: var(--secondary);
+        }
+        
+        /* Social Media Videos Section */
+        .social-videos-section {
+            padding: 80px 0;
+            background-color: #f8f9fa;
+        }
+        
+        .social-video-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 30px;
+            background: white;
+        }
+        
+        .social-video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .video-container {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .video-platform {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .video-content {
+            padding: 20px;
+        }
+        
+        .video-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .video-stats {
+            display: flex;
+            justify-content: space-between;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        
+        .social-platform-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .platform-tab {
+            padding: 12px 25px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: #6c757d;
+            position: relative;
+            transition: color 0.3s;
+        }
+        
+        .platform-tab.active {
+            color: var(--primary);
+        }
+        
+        .platform-tab.active:after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--secondary);
+        }
+        
+        .platform-tab:hover {
+            color: var(--primary);
+        }
+        
+        .social-videos-container {
+            display: none;
+        }
+        
+        .social-videos-container.active {
+            display: block;
+        }
+        
+        .watch-more-btn {
+            display: block;
+            margin: 40px auto 0;
+            max-width: 250px;
+            text-align: center;
+        }
+        
+        .video-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .video-control-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .video-control-btn:hover {
+            background: rgba(0,0,0,0.9);
+        }
+
+    .tiktok-video-placeholder {
+        position: relative;
+        height: 250px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        overflow: hidden;
+    }
+
+    .tiktok-overlay {
+        text-align: center;
+        z-index: 2;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .tiktok-play-btn {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 15px auto 0;
+        transition: all 0.3s ease;
+        color: #000;
+    }
+
+    .tiktok-play-btn i {
+        margin-left: 3px;
+    }
+    /* Instagram Video Styles */
+    .instagram-video-placeholder {
+        position: relative;
+        height: 250px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        overflow: hidden;
+    }
+
+    .instagram-overlay {
+        text-align: center;
+        z-index: 2;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .instagram-play-btn {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 15px auto 0;
+        transition: all 0.3s ease;
+        color: #000;
+    }
+
+    .instagram-play-btn i {
+        margin-left: 3px;
+    }
+
+    .social-video-card:hover .instagram-play-btn {
+        background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .social-video-card:hover .instagram-overlay {
+        transform: translateY(-5px);
+    }
+    .social-video-card:hover .tiktok-play-btn {
+        background: var(--secondary);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .social-video-card:hover .tiktok-overlay {
+        transform: translateY(-5px);
+    }
+
+    /* Make the entire card clickable */
+    .social-video-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .social-video-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <i class="far fa-clock"></i> Mon - Sat: 09:00 AM - 07:00 PM
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="tel:+2347060882711"><i class="fas fa-phone"></i> +234 706 088 2711</a>
+                    <a href="#"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Biltronix Automotive</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#social-videos">Videos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonials">Testimonials</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#booking">Booking</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class='nav-link' href='/sales'>Our Store</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="container">
+            <div id="heroMainCarousel" class="carousel slide hero-main-carousel" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#heroMainCarousel" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#heroMainCarousel" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#heroMainCarousel" data-bs-slide-to="2"></button>
+                </div>
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/Lexus-2020.jpg" class="d-block w-100" alt="Expert automotive workshop">
+                        <div class="carousel-caption">
+                            <h2>Expert Automotive Solutions</h2>
+                            <p>Your trusted partner for diagnostics, repairs, and complete vehicle care.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/highlander-2020.jpg" class="d-block w-100" alt="Cars for sale">
+                        <div class="carousel-caption">
+                            <h2>Quality Cars You Can Trust</h2>
+                            <p>Browse inspected vehicles with transparent condition and pricing.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/2020-4runner.jpg" class="d-block w-100" alt="Car parts and accessories">
+                        <div class="carousel-caption">
+                            <h2>Genuine Parts and Accessories</h2>
+                            <p>From essential replacements to premium upgrades for every car.</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroMainCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroMainCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+            <a href="#booking" class="btn btn-primary btn-lg">Book a Service</a>
+            <a href="/sales" class="btn btn-outline-light btn-lg ms-2">Our Store</a>
+            <div class="quick-categories">
+                <div class="quick-cat-card">
+                    <i class="fas fa-car-side"></i>
+                    <h5>Cars</h5>
+                    <p>Inspected vehicles ready for purchase.</p>
+                </div>
+                <div class="quick-cat-card">
+                    <i class="fas fa-cogs"></i>
+                    <h5>Car Parts</h5>
+                    <p>Genuine and durable replacement components.</p>
+                </div>
+                <div class="quick-cat-card">
+                    <i class="fas fa-toolbox"></i>
+                    <h5>Accessories</h5>
+                    <p>Style, comfort and tech upgrades for all models.</p>
+                </div>
+                <div class="quick-cat-card">
+                    <i class="fas fa-wrench"></i>
+                    <h5>Repairs</h5>
+                    <p>Diagnostics, troubleshooting and workshop support.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="py-5" id="about">
+        <div class="container">
+            <h2 class="section-title">About Biltronix Automotive</h2>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h3>Your Trusted Automotive Partner</h3>
+                    <p>With years of experience in the automotive industry, Biltronix Automotive has established itself as a leader in vehicle diagnostics, repair, and maintenance. Our team of certified technicians uses state-of-the-art equipment to deliver exceptional service for all vehicle makes and models.</p>
+                    <p>We pride ourselves on our commitment to quality, transparency, and customer satisfaction. Whether you need routine maintenance or complex repairs, you can trust Biltronix Automotive to get your vehicle back on the road safely and efficiently.</p>
+                    <div class="row mt-4">
+                        <div class="col-sm-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Certified Technicians</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Advanced Diagnostics</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Quality Parts</li>
+                            </ul>
+                        </div>
+                        <div class="col-sm-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Transparent Pricing</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Quick Turnaround</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Warranty on Services</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <img src="https://images.unsplash.com/photo-1621461133947-f63381c2f7f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Biltronix Automotive Workshop" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 col-6 stat-item">
+                    <div class="stat-number">5000+</div>
+                    <div class="stat-label">Vehicles Serviced</div>
+                </div>
+                <div class="col-md-3 col-6 stat-item">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Years Experience</div>
+                </div>
+                <div class="col-md-3 col-6 stat-item">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">Customer Satisfaction</div>
+                </div>
+                <div class="col-md-3 col-6 stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Expert Technicians</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-5 bg-light" id="services">
+        <div class="container">
+            <h2 class="section-title">Our Services</h2>
+            <p class="text-center mb-5">We offer a comprehensive range of automotive services to keep your vehicle running at its best.</p>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="computerized Diagnostics.jpg" class="card-img-top" alt="Computerized Diagnostics">
+                        <div class="card-body">
+                            <h5 class="card-title">Computerized Diagnostics</h5>
+                            <p class="card-text">Accurate fault detection using advanced scanners for all car models. Identify issues before they become major problems.</p>
+                            <a href="#booking" class="btn btn-outline-primary">Book Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4ffM_czubFG75GOhw8ycmFvxtKN6H8YnpoD8lJZseIxyzwZRwaCCU3Fr0DFmnLPEkKiI&usqp=CAU" class="card-img-top" alt="Engine Repair">
+                        <div class="card-body">
+                            <h5 class="card-title">Engine & Transmission Repair</h5>
+                            <p class="card-text">Complete engine and gearbox restoration for peak performance. Expert repairs to extend your vehicle's lifespan.</p>
+                            <a href="#booking" class="btn btn-outline-primary">Book Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://www.servomotorsadjust.com/wp-content/uploads/2023/08/48V-BATTERY-MB-W206-2.jpg" class="card-img-top" alt="EV Battery Repair">
+                        <div class="card-body">
+                            <h5 class="card-title">Hybrid & EV Battery Repair</h5>
+                            <p class="card-text">Specialized maintenance for hybrid systems in Porsche, Mercedes, and other EVs. Keep your electric vehicle running efficiently.</p>
+                            <a href="#booking" class="btn btn-outline-primary">Book Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://di-uploads-pod2.dealerinspire.com/bmwofwesleychapel/uploads/2024/02/Oil.png" class="card-img-top" alt="Oil Change">
+                        <div class="card-body">
+                            <h5 class="card-title">Oil Change & Maintenance</h5>
+                            <p class="card-text">Preventive care including oil replacement, filter changes, and tune-ups. Regular maintenance for optimal performance.</p>
+                            <a href="#booking" class="btn btn-outline-primary">Book Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSme_e8HiK55ggfsH1w0QSSDfDSTiddwJluxzOUtyNxMvahgEMMwoE2OAv23M8ZRAQOZDY&usqp=CAU" class="card-img-top" alt="Pre-Purchase Inspection">
+                        <div class="card-body">
+                            <h5 class="card-title">Pre-Purchase Inspection</h5>
+                            <p class="card-text">Thorough evaluation and history check before purchasing any vehicle. Make an informed decision with our expert assessment.</p>
+                            <a href="#booking" class="btn btn-outline-primary">Book Now</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Crash Repairs">
+                        <div class="card-body">
+                            <h5 class="card-title">Crash Repairs & Panel Beating</h5>
+                            <p class="card-text">Complete bodywork restoration, painting, and frame alignment post-accidents. Restore your vehicle to its original condition.</p>
+                            <a href="#booking" class="btn btn-outline-primary">Book Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="#booking" class="btn btn-primary btn-lg">View All Services</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title">Why Choose Biltronix Automotive</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <i class="fas fa-tools"></i>
+                        <h4>Advanced Equipment</h4>
+                        <p>We use the latest diagnostic tools and repair equipment to ensure precision in every service.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <i class="fas fa-user-tie"></i>
+                        <h4>Certified Technicians</h4>
+                        <p>Our team consists of highly trained and certified professionals with years of experience.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Quality Guarantee</h4>
+                        <p>We stand behind our work with comprehensive warranties on all our services.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Media Videos Section -->
+    <section class="social-videos-section" id="social-videos">
+        <div class="container">
+            <h2 class="section-title">Our Latest Videos</h2>
+            <p class="text-center mb-5">Check out our latest automotive tips, repair processes, and customer stories on social media.</p>
+            
+            <!-- Platform Tabs -->
+            <div class="social-platform-tabs">
+                <button class="platform-tab active" data-platform="instagram">Instagram</button>
+                <button class="platform-tab" data-platform="tiktok">TikTok</button>
+            </div>
+            
+            <!-- Instagram Videos -->
+                <div class="social-videos-container active" id="instagram-videos">
+                    <div class="row">
+                        <!-- Volkswagen Atlas -->
+                        <div class="col-md-4">
+                            <div class="social-video-card" onclick="window.open('https://www.instagram.com/p/DLlTcH1NxkV/?igsh=MThocm1mZ3IxMnh0dw==', '_blank')" style="cursor: pointer;">
+                                <div class="video-container">
+                                    <div class="instagram-video-placeholder" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1622737133809-d95047b9e673?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
+                                        <div class="instagram-overlay">
+                                            <i class="fab fa-instagram fa-3x mb-3"></i>
+                                            <h5>Watch on Instagram</h5>
+                                            <p>Click to view this video</p>
+                                            <div class="instagram-play-btn">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="video-platform">
+                                        <i class="fab fa-instagram"></i> Instagram
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h5 class="video-title">Volkswagen Atlas with Engine Performance Issues</h5>
+                                    <p>Diagnosis and repair of engine performance issues caused by complex electrical problems in Volkswagen Atlas.</p>
+                                    <div class="video-stats">
+                                        <span><i class="far fa-eye"></i> 12.5K views</span>
+                                        <span><i class="far fa-heart"></i> 2.3K likes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rolls Royce Cullinan -->
+                        <div class="col-md-4">
+                            <div class="social-video-card" onclick="window.open('https://www.instagram.com/reel/DCDexnJIFg4/?igsh=MXZwaHNyNW5qOGRvOA==', '_blank')" style="cursor: pointer;">
+                                <div class="video-container">
+                                    <div class="instagram-video-placeholder" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1621461133947-f63381c2f7f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
+                                        <div class="instagram-overlay">
+                                            <i class="fab fa-instagram fa-3x mb-3"></i>
+                                            <h5>Watch on Instagram</h5>
+                                            <p>Click to view this video</p>
+                                            <div class="instagram-play-btn">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="video-platform">
+                                        <i class="fab fa-instagram"></i> Instagram
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h5 class="video-title">Rolls Royce Cullinan 2021 Key Signal Issue</h5>
+                                    <p>Vehicle not responding to key signal - complete diagnosis and professional fix for luxury vehicle security system.</p>
+                                    <div class="video-stats">
+                                        <span><i class="far fa-eye"></i> 8.7K views</span>
+                                        <span><i class="far fa-heart"></i> 1.5K likes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kia Cerato/Forte -->
+                        <div class="col-md-4">
+                            <div class="social-video-card" onclick="window.open('https://www.instagram.com/p/DAzm-a9IBkA/?img_index=6&igsh=eG5tbjN0emEwY2J2', '_blank')" style="cursor: pointer;">
+                                <div class="video-container">
+                                    <div class="instagram-video-placeholder" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1603712610494-4316a99b227a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
+                                        <div class="instagram-overlay">
+                                            <i class="fab fa-instagram fa-3x mb-3"></i>
+                                            <h5>Watch on Instagram</h5>
+                                            <p>Click to view this video</p>
+                                            <div class="instagram-play-btn">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="video-platform">
+                                        <i class="fab fa-instagram"></i> Instagram
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h5 class="video-title">2014 Kia Cerato/Forte CAN Bus Failure</h5>
+                                    <p>Professional diagnosis and repair of CAN Bus network failure affecting vehicle communication systems and performance.</p>
+                                    <div class="video-stats">
+                                        <span><i class="far fa-eye"></i> 15.2K views</span>
+                                        <span><i class="far fa-heart"></i> 3.1K likes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://www.instagram.com/biltronix/" target="_blank" class="btn btn-primary watch-more-btn">
+                        <i class="fab fa-instagram"></i> View More on Instagram
+                    </a>
+                </div>
+            
+           <!-- TikTok Videos -->
+                <div class="social-videos-container" id="tiktok-videos">
+                    <div class="row">
+                        <!-- Audi 48V Battery Repair -->
+                        <div class="col-md-4">
+                            <div class="social-video-card" onclick="window.open('https://vt.tiktok.com/ZSyQhfs32/', '_blank')" style="cursor: pointer;">
+                                <div class="video-container">
+                                    <div class="tiktok-video-placeholder" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://www.servomotorsadjust.com/wp-content/uploads/2023/08/48V-BATTERY-MB-W206-2.jpg'); background-size: cover; background-position: center;">
+                                        <div class="tiktok-overlay">
+                                            <i class="fab fa-tiktok fa-3x mb-3"></i>
+                                            <h5>Watch on TikTok</h5>
+                                            <p>Click to view this video</p>
+                                            <div class="tiktok-play-btn">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="video-platform">
+                                        <i class="fab fa-tiktok"></i> TikTok
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h5 class="video-title">Repair Of Audi 48V Mild Hybrid Battery</h5>
+                                    <p>Expert repair and restoration of Audi's 48V mild hybrid battery system for optimal performance and efficiency.</p>
+                                    <div class="video-stats">
+                                        <span><i class="far fa-eye"></i> 25.4K views</span>
+                                        <span><i class="far fa-heart"></i> 4.2K likes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lamborghini Urus Electrical Repair -->
+                        <div class="col-md-4">
+                            <div class="social-video-card" onclick="window.open('https://vt.tiktok.com/ZSyQhDhbc/', '_blank')" style="cursor: pointer;">
+                                <div class="video-container">
+                                    <div class="tiktok-video-placeholder" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1622737133809-d95047b9e673?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
+                                        <div class="tiktok-overlay">
+                                            <i class="fab fa-tiktok fa-3x mb-3"></i>
+                                            <h5>Watch on TikTok</h5>
+                                            <p>Click to view this video</p>
+                                            <div class="tiktok-play-btn">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="video-platform">
+                                        <i class="fab fa-tiktok"></i> TikTok
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h5 class="video-title">Lamborghini Urus Electrical & Suspension Repair</h5>
+                                    <p>Diagnosis and repair of complex electrical issues affecting the suspension system in a Lamborghini Urus.</p>
+                                    <div class="video-stats">
+                                        <span><i class="far fa-eye"></i> 38.7K views</span>
+                                        <span><i class="far fa-heart"></i> 6.8K likes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Infiniti FX35 Repair -->
+                        <div class="col-md-4">
+                            <div class="social-video-card" onclick="window.open('https://vt.tiktok.com/ZSyQhGjxX/', '_blank')" style="cursor: pointer;">
+                                <div class="video-container">
+                                    <div class="tiktok-video-placeholder" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1603712610494-4316a99b227a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center;">
+                                        <div class="tiktok-overlay">
+                                            <i class="fab fa-tiktok fa-3x mb-3"></i>
+                                            <h5>Watch on TikTok</h5>
+                                            <p>Click to view this video</p>
+                                            <div class="tiktok-play-btn">
+                                                <i class="fas fa-play"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="video-platform">
+                                        <i class="fab fa-tiktok"></i> TikTok
+                                    </div>
+                                </div>
+                                <div class="video-content">
+                                    <h5 class="video-title">Infiniti FX35 Starting Issue Resolution</h5>
+                                    <p>Successful diagnosis and repair after 6 months of unresolved starting issues. Professional solution for complex automotive problems.</p>
+                                    <div class="video-stats">
+                                        <span><i class="far fa-eye"></i> 42.1K views</span>
+                                        <span><i class="far fa-heart"></i> 7.3K likes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://tiktok.com/@biltronix" target="_blank" class="btn btn-primary watch-more-btn">
+                        <i class="fab fa-tiktok"></i> View More on TikTok
+                    </a>
+                </div>
+
+    <!-- Testimonials Section -->
+    <section class="py-5 bg-light" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Our Clients Say</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "Biltronix Automotive diagnosed and fixed an issue that three other mechanics couldn't figure out. Their expertise is unmatched!"
+                        </div>
+                        <div class="testimonial-author">- James O.</div>
+                        <div class="rating">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "The pre-purchase inspection saved me from buying a car with hidden problems. Professional service from start to finish."
+                        </div>
+                        <div class="testimonial-author">- Sarah T.</div>
+                        <div class="rating">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "Fast, reliable, and transparent pricing. My go-to automotive service center for all my vehicle needs."
+                        </div>
+                        <div class="testimonial-author">- Michael B.</div>
+                        <div class="rating">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section class="py-5" id="booking">
+        <div class="container">
+            <h2 class="section-title">Book a Service</h2>
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="booking-form">
+                        <form id="bookingForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="vehicle" class="form-label">Vehicle Make & Model</label>
+                                        <input type="text" class="form-control" id="vehicle" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="year" class="form-label">Vehicle Year</label>
+                                        <input type="number" class="form-control" id="year" min="1990" max="2025">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="service" class="form-label">Service Required</label>
+                                <select class="form-select" id="service" required>
+                                    <option value="">Select a service</option>
+                                    <option value="diagnostics">Computerized Diagnostics</option>
+                                    <option value="engine">Engine & Transmission Repair</option>
+                                    <option value="ev">Hybrid & EV Battery Repair</option>
+                                    <option value="maintenance">Oil Change & Maintenance</option>
+                                    <option value="inspection">Pre-Purchase Inspection</option>
+                                    <option value="repairs">Crash Repairs & Panel Beating</option>
+                                    <option value="other">Other Service</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Preferred Date</label>
+                                <input type="date" class="form-control" id="date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Additional Details</label>
+                                <textarea class="form-control" id="message" rows="4"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Book Appointment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-5 bg-light" id="contact">
+        <div class="container">
+            <h2 class="section-title">Contact Us</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="contact-info">
+                        <h4>Get In Touch</h4>
+                        <p>We're here to answer any questions you may have about our services. Reach out to us and we'll respond as soon as we can.</p>
+                        
+                        <div class="contact-info">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <strong>Address:</strong> 123 Automotive Avenue, Lagos, Nigeria
+                        </div>
+                        <div class="contact-info">
+                            <i class="fas fa-phone"></i>
+                            <strong>Phone:</strong> +234 706 088 2711
+                        </div>
+                        <div class="contact-info">
+                            <i class="fas fa-envelope"></i>
+                            <strong>Email:</strong> biltronixtech@gmail.com
+                        </div>
+                        <div class="contact-info">
+                            <i class="far fa-clock"></i>
+                            <strong>Working Hours:</strong> Mon - Sat: 09:00 AM - 07:00 PM
+                        </div>
+                        
+                        <div class="social-icons mt-4">
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-tiktok"></i></a>
+                            <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="map-container">
+                        <!-- In a real implementation, you would embed a Google Map here -->
+                        <div style="background-color: #e9ecef; height: 300px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <p class="text-muted">Google Maps Integration</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="footer-heading">Biltronix Automotive</h5>
+                    <p>Expert Automotive Solutions for all your vehicle needs. Trusted by thousands of satisfied customers.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5 class="footer-heading">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#social-videos">Videos</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="footer-heading">Services</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Diagnostics</a></li>
+                        <li><a href="#">Engine Repair</a></li>
+                        <li><a href="#">EV Services</a></li>
+                        <li><a href="#">Maintenance</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="footer-heading">Contact Info</h5>
+                    <div class="contact-info">
+                        <i class="fas fa-map-marker-alt"></i> 123 Automotive Avenue, Lagos
+                    </div>
+                    <div class="contact-info">
+                        <i class="fas fa-phone"></i> +234 706 088 2711
+                    </div>
+                    <div class="contact-info">
+                        <i class="far fa-clock"></i> Mon - Sat: 09:00 AM - 07:00 PM
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-4 mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2025 Biltronix Automotive. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="me-3">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="floating-actions" aria-label="Quick actions">
+        <a class="floating-store" href="/sales" title="Open Store">
+            <i class="fas fa-store"></i>
+        </a>
+        <a class="floating-whatsapp" href="https://wa.me/2347060882711?text=Hello%20Biltronix!%20I%20need%20a%20car,%20parts,%20or%20service." target="_blank" title="Chat on WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple form submission handler
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for your booking request! We will contact you shortly to confirm your appointment.');
+            this.reset();
+        });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Social media platform tabs functionality
+        document.querySelectorAll('.platform-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.platform-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all video containers
+                document.querySelectorAll('.social-videos-container').forEach(container => {
+                    container.classList.remove('active');
+                });
+                
+                // Show the selected platform's videos
+                const platform = this.getAttribute('data-platform');
+                document.getElementById(`${platform}-videos`).classList.add('active');
+            });
+        });
+        
+        // Video controls functionality
+        document.querySelectorAll('.social-video-card').forEach(card => {
+            const video = card.querySelector('video');
+            const playPauseBtn = card.querySelector('.play-pause');
+            const muteUnmuteBtn = card.querySelector('.mute-unmute');
+            
+            // Play/Pause functionality
+            playPauseBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if(video.paused) {
+                    video.play();
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    video.pause();
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+            
+            // Mute/Unmute functionality
+            muteUnmuteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if(video.muted) {
+                    video.muted = false;
+                    this.innerHTML = '<i class="fas fa-volume-up"></i>';
+                } else {
+                    video.muted = true;
+                    this.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                }
+            });
+            
+            // Update play button when video ends
+            video.addEventListener('ended', function() {
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            });
+            
+            // Pause video when card is not in view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting && !video.paused) {
+                        video.pause();
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(card);
+        });
+        
+        // Auto-play videos when they come into view
+        const videoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const video = entry.target.querySelector('video');
+                    const playBtn = entry.target.querySelector('.play-pause');
+                    if (video && !video.paused) {
+                        video.play();
+                        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    }
+                }
+            });
+        }, { threshold: 0.7 });
+        
+        document.querySelectorAll('.social-video-card').forEach(card => {
+            videoObserver.observe(card);
+        // TikTok video card click handlers
+        document.querySelectorAll('#tiktok-videos .social-video-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Don't trigger if clicking on internal links or buttons
+                if (e.target.tagName === 'A' || e.target.closest('a')) {
+                    return;
+                }
+                
+                const videoUrl = this.getAttribute('onclick').match(/'(.*?)'/)[1];
+                window.open(videoUrl, '_blank');
+            });
+        });
+        });
+    </script>
+</body>
+</html>
