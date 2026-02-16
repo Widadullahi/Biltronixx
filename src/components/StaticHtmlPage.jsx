@@ -67,6 +67,32 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
     const root = containerRef.current;
     if (!root) return undefined;
 
+    const applyStoreFilters = () => {
+      const activeFilter = root.dataset.activeFilter || 'all';
+      const searchInput = root.querySelector('[data-store-search]');
+      const query =
+        searchInput instanceof HTMLInputElement ? searchInput.value.trim().toLowerCase() : '';
+      const cards = root.querySelectorAll('[data-product-card]');
+
+      cards.forEach((card) => {
+        const category = (card.getAttribute('data-category') || '').toLowerCase();
+        const text = (card.textContent || '').toLowerCase();
+        const matchesCategory = activeFilter === 'all' || category === activeFilter;
+        const matchesSearch = !query || text.includes(query);
+        card.style.display = matchesCategory && matchesSearch ? '' : 'none';
+      });
+    };
+
+    const setActiveFilter = (filterValue) => {
+      root.dataset.activeFilter = filterValue;
+      root.querySelectorAll('[data-filter]').forEach((btn) => {
+        if (!(btn instanceof HTMLElement)) return;
+        const isActive = btn.getAttribute('data-filter') === filterValue;
+        btn.classList.toggle('active', isActive);
+      });
+      applyStoreFilters();
+    };
+
     const onSubmit = (event) => {
       const form = event.target;
       if (!(form instanceof HTMLFormElement)) return;
@@ -156,14 +182,34 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
         const product = detailsBtn.getAttribute('data-product') || 'Selected product';
         alert(`Product Details: ${product}\n\nIn a full implementation, this would open a detailed product page with specifications, photos, and more information.`);
       }
+
+      const filterBtn = target.closest('[data-filter]');
+      if (filterBtn instanceof HTMLElement) {
+        const filterValue = filterBtn.getAttribute('data-filter');
+        if (filterValue) setActiveFilter(filterValue);
+      }
+    };
+
+    const onInput = (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.matches('[data-store-search]')) {
+        applyStoreFilters();
+      }
     };
 
     root.addEventListener('submit', onSubmit);
     root.addEventListener('click', onClick);
+    root.addEventListener('input', onInput);
+
+    if (root.querySelector('[data-product-card]')) {
+      setActiveFilter('all');
+    }
 
     return () => {
       root.removeEventListener('submit', onSubmit);
       root.removeEventListener('click', onClick);
+      root.removeEventListener('input', onInput);
     };
   }, [parts.bodyHtml]);
 

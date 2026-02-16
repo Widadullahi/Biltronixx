@@ -1,1260 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biltronix Auto Store - Vehicles, Parts & Accessories</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #1d2d5b;
-            --secondary: #f00001;
-            --accent: #ff7a00;
-            --light: #f8fbff;
-            --dark: #141a2f;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .navbar {
-            background-color: #ffffff;
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-bottom: 1px solid #e8edf3;
-        }
-        
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.8rem;
-            color: var(--primary) !important;
-        }
-        
-        .navbar-nav .nav-link {
-            color: var(--primary) !important;
-            font-weight: 500;
-            margin: 0 8px;
-            transition: color 0.3s;
-        }
-        
-        .navbar-nav .nav-link:hover {
-            color: #0f2747 !important;
-        }
-        
-        .hero-section {
-            background: linear-gradient(rgba(29,45,91,0.78), rgba(240,0,1,0.55)), url('https://www.pivotmotors.com/wp-content/uploads/2019/05/Land-Cruiser.jpg');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 150px 0;
-            text-align: center;
-        }
-        
-        .hero-section h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        
-        .hero-section p {
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto 30px;
-        }
-        
-        .btn-primary {
-            background-color: var(--secondary);
-            border: none;
-            padding: 12px 30px;
-            font-weight: 600;
-            transition: all 0.3s;
-            border-radius: 40px;
-        }
-        
-        .btn-primary:hover {
-            background-color: #cb0001;
-            transform: translateY(-3px);
-        }
-        
-        .btn-whatsapp {
-            background-color: #25D366;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-whatsapp:hover {
-            background-color: #128C7E;
-            transform: translateY(-3px);
-            color: white;
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-bottom: 50px;
-            position: relative;
-        }
-        
-        .section-title:after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 4px;
-            background: var(--secondary);
-            margin: 15px auto;
-        }
-        
-        .product-card {
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            margin-bottom: 30px;
-            height: 100%;
-        }
-        
-        .product-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-        
-        .product-card img {
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.5s;
-        }
-        
-        .product-card:hover img {
-            transform: scale(1.05);
-        }
-        
-        .product-card .card-body {
-            padding: 25px;
-        }
-        
-        .product-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 10px;
-        }
-        
-        .product-features {
-            display: flex;
-            justify-content: space-between;
-            margin: 15px 0;
-            font-size: 0.9rem;
-            color: #6c757d;
-        }
-        
-        .product-feature {
-            text-align: center;
-        }
-        
-        .product-feature i {
-            color: var(--secondary);
-            margin-bottom: 5px;
-            display: block;
-        }
-        
-        .testimonial-card {
-            background-color: var(--light);
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        
-        .testimonial-text {
-            font-style: italic;
-            margin-bottom: 20px;
-        }
-        
-        .testimonial-author {
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        .contact-form {
-            background-color: var(--light);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        
-        footer {
-            background-color: var(--dark);
-            color: white;
-            padding: 60px 0 20px;
-        }
-        
-        .footer-heading {
-            color: var(--secondary);
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-        
-        .social-icons a {
-            color: white;
-            font-size: 1.2rem;
-            margin-right: 15px;
-            transition: color 0.3s;
-        }
-        
-        .social-icons a:hover {
-            color: var(--secondary);
-        }
-        
-        .contact-info {
-            margin-bottom: 10px;
-        }
-        
-        .contact-info i {
-            color: var(--secondary);
-            margin-right: 10px;
-        }
-        
-        .feature-box {
-            text-align: center;
-            padding: 30px 20px;
-            border-radius: 10px;
-            transition: all 0.3s;
-            margin-bottom: 30px;
-        }
-        
-        .feature-box:hover {
-            background-color: var(--light);
-            transform: translateY(-5px);
-        }
-        
-        .feature-box i {
-            font-size: 2.5rem;
-            color: var(--secondary);
-            margin-bottom: 20px;
-        }
-        
-        .stats-section {
-            background-color: var(--primary);
-            color: white;
-            padding: 80px 0;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 10px;
-        }
-        
-        .top-bar {
-            background-color: var(--dark);
-            color: white;
-            padding: 10px 0;
-            font-size: 0.9rem;
-        }
-        
-        .top-bar a {
-            color: white;
-            text-decoration: none;
-            margin-right: 15px;
-        }
-        
-        .top-bar a:hover {
-            color: var(--secondary);
-        }
-        
-        .filter-section {
-            background-color: var(--light);
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 40px;
-        }
-        
-        .product-status {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .status-new {
-            background-color: #48bb78;
-            color: white;
-        }
-        
-        .status-used {
-            background-color: #ed8936;
-            color: white;
-        }
-        
-        .status-featured {
-            background-color: var(--secondary);
-            color: white;
-        }
-        
-        .status-sale {
-            background-color: #9f7aea;
-            color: white;
-        }
-        
-        .cart-badge {
-            background-color: var(--secondary);
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            position: absolute;
-            top: -5px;
-            right: -5px;
-        }
-        
-        .search-box {
-            position: relative;
-        }
-        
-        .search-box input {
-            padding-right: 40px;
-        }
-        
-        .search-box i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-        }
-        
-        .wishlist-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255,255,255,0.9);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        
-        .wishlist-btn:hover {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .category-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .category-tab {
-            padding: 12px 25px;
-            background: none;
-            border: none;
-            font-weight: 600;
-            color: #6c757d;
-            position: relative;
-            transition: color 0.3s;
-        }
-        
-        .category-tab.active {
-            color: var(--primary);
-        }
-        
-        .category-tab.active:after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--secondary);
-        }
-        
-        .category-tab:hover {
-            color: var(--primary);
-        }
-        
-        .products-container {
-            display: none;
-        }
-        
-        .products-container.active {
-            display: block;
-        }
-        
-        .part-compatibility {
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-bottom: 10px;
-        }
-        
-        .stock-status {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-        
-        .in-stock {
-            color: #48bb78;
-        }
-        
-        .low-stock {
-            color: #ed8936;
-        }
-        
-        .out-of-stock {
-            color: #e53e3e;
-        }
-        
-        .whatsapp-float {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background-color: #25D366;
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-            z-index: 1000;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-        
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-            background-color: #128C7E;
-            color: white;
-        }
-        
-        .whatsapp-notice {
-            background-color: #25D366;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biltronix Store</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --blue: #13315f;
+      --red: #ef233c;
+      --ink: #1b263b;
+      --soft: #f6f9ff;
+      --line: #dfe7f3;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .container { width: min(1140px, 92%); margin: 0 auto; }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav-inner {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      font-family: Montserrat, sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      text-decoration: none;
+      color: var(--blue);
+    }
+
+    .brand span { color: var(--red); }
+
+    .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--blue);
+      font-weight: 600;
+      padding: 9px 12px;
+      border-radius: 999px;
+    }
+
+    .nav-links a.hot { background: var(--red); color: #fff; }
+
+    .hero {
+      padding: 26px 0;
+      background: radial-gradient(circle at 12% 8%, #fff2f5 0%, #fff 37%), radial-gradient(circle at 88% 16%, #eef5ff 0%, #fff 36%);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: Montserrat, sans-serif;
+      color: var(--blue);
+      font-size: clamp(1.7rem, 4vw, 2.6rem);
+      line-height: 1.1;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: #496082;
+      max-width: 760px;
+    }
+
+    .filter-box {
+      margin-top: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--blue);
+      border-radius: 999px;
+      font-weight: 700;
+      padding: 9px 14px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--red);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .search-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 13px;
+      font-size: 0.97rem;
+      outline: none;
+    }
+
+    .search-input:focus { border-color: #b7c8e3; }
+
+    .section { padding: 28px 0 50px; }
+
+    .section h2 {
+      margin: 0;
+      font-family: Montserrat, sans-serif;
+      color: var(--blue);
+      font-size: clamp(1.3rem, 2.8vw, 1.9rem);
+    }
+
+    .section .hint { margin-top: 8px; color: #4f6486; }
+
+    .products-grid {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .product-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 26px rgba(19, 49, 95, 0.08);
+    }
+
+    .product-card img { width: 100%; height: 186px; object-fit: cover; }
+
+    .product-body { padding: 14px; }
+
+    .badge {
+      display: inline-block;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      color: var(--blue);
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      text-transform: uppercase;
+    }
+
+    .product-body h3 {
+      margin: 8px 0 6px;
+      color: var(--blue);
+      font-size: 1.04rem;
+    }
+
+    .product-body p { margin: 0; color: #51627f; font-size: 0.92rem; min-height: 42px; }
+
+    .price {
+      margin-top: 10px;
+      color: var(--red);
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+
+    .actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .btn {
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn.whatsapp { background: #25d366; color: #fff; }
+    .btn.details { background: var(--soft); color: var(--blue); border: 1px solid var(--line); }
+
+    .floating-wa {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      text-decoration: none;
+      background: #25d366;
+      font-size: 1.2rem;
+      box-shadow: 0 10px 24px rgba(8, 20, 41, 0.32);
+      z-index: 90;
+    }
+
+    footer {
+      background: #0c1b33;
+      color: #abc1e4;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 980px) {
+      .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 620px) {
+      .nav-inner { padding: 8px 0; }
+      .brand { font-size: 1.05rem; }
+      .nav-links a { font-size: 0.88rem; padding: 7px 10px; }
+      .filter-btn { padding: 8px 12px; font-size: 0.86rem; }
+      .products-grid { grid-template-columns: 1fr; }
+      .product-card img { height: 210px; }
+    }
+  </style>
 </head>
 <body>
-    <!-- WhatsApp Float Button -->
-    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20your%20products." 
-       class="whatsapp-float" 
-       target="_blank">
-        <i class="fab fa-whatsapp"></i>
-    </a>
-
-    <!-- Top Bar -->
-    <div class="top-bar">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <i class="far fa-clock"></i> Mon - Sat: 09:00 AM - 07:00 PM
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="tel:+2347060882711"><i class="fas fa-phone"></i> +234 706 088 2711</a>
-                    <a href="../biltronix-automotive.html"><i class="fas fa-wrench"></i> Auto Services</a>
-                </div>
-            </div>
-        </div>
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a class="brand" href="/">Biltronix <span>Store</span></a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/">Services</a>
+        <a class="hot" href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Store!" target="_blank">WhatsApp</a>
+      </div>
     </div>
+  </nav>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">Biltronix Auto Store</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class='nav-link' href='/'>Home</a>
-                    </li>
-                  
-                    <li class="nav-item">
-                        <a class="nav-link" href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I%20want%20to%20make%20an%20inquiry." target="_blank">
-                            <i class="fab fa-whatsapp"></i> WhatsApp
-                        </a>
-                    </li>
-                </ul>
-            </div>
+  <header class="hero">
+    <div class="container">
+      <h1>Everything We Sell in One View</h1>
+      <p>All products are shown below by default. Use filters to view only vehicles, parts, or accessories.</p>
+      <div class="filter-box">
+        <div class="filter-row" role="group" aria-label="product filters">
+          <button class="filter-btn active" type="button" data-filter="all">All</button>
+          <button class="filter-btn" type="button" data-filter="vehicle">Vehicles</button>
+          <button class="filter-btn" type="button" data-filter="part">Car Parts</button>
+          <button class="filter-btn" type="button" data-filter="accessory">Accessories</button>
         </div>
-    </nav>
+        <input class="search-input" type="search" placeholder="Search product, model, brand, or type..." data-store-search />
+      </div>
+    </div>
+  </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section" id="home">
-        <div class="container">
-            <h1>Complete Automotive Solutions</h1>
-            <p>Your one-stop shop for premium vehicles, genuine spare parts, and quality accessories. Quality guaranteed with comprehensive inspections.</p>
-            <a href="#vehicles" class="btn btn-primary btn-lg">Browse Vehicles</a>
-            <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I%20need%20help%20choosing%20a%20product." 
-               class="btn btn-whatsapp btn-lg ms-2" 
-               target="_blank">
-                <i class="fab fa-whatsapp"></i> Chat on WhatsApp
-            </a>
-        </div>
-    </section>
+  <main class="section" id="products">
+    <div class="container">
+      <h2>Available Products</h2>
+      <p class="hint">Tap a filter to narrow the list, or search by name.</p>
 
-    <!-- Category Tabs -->
-    <section class="py-5">
-        <div class="container">
-            <div class="category-tabs">
-                <button class="category-tab active" data-category="vehicles">Vehicles</button>
-                <button class="category-tab" data-category="parts">Spare Parts</button>
-                <button class="category-tab" data-category="accessories">Accessories</button>
-            </div>
-            
-            <!-- WhatsApp Notice -->
-            <div class="whatsapp-notice">
-                <i class="fab fa-whatsapp"></i> All purchases and inquiries through WhatsApp: +234 706 088 2711
-            </div>
-            
-            <!-- Vehicles Section -->
-            <div class="products-container active" id="vehicles-container">
-                <h2 class="section-title">Featured Vehicles</h2>
-                
-                <!-- Filter Section -->
-                <div class="filter-section">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="search-box">
-                                <input type="text" class="form-control" placeholder="Search vehicles...">
-                                <i class="fas fa-search"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select">
-                                <option value="">All Makes</option>
-                                <option value="mercedes">Mercedes-Benz</option>
-                                <option value="bmw">BMW</option>
-                                <option value="audi">Audi</option>
-                                <option value="toyota">Toyota</option>
-                                <option value="honda">Honda</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select">
-                                <option value="">All Models</option>
-                                <option value="suv">SUV</option>
-                                <option value="sedan">Sedan</option>
-                                <option value="coupe">Coupe</option>
-                                <option value="hatchback">Hatchback</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select">
-                                <option value="">All Prices</option>
-                                <option value="0-20000">Under ₦20,000</option>
-                                <option value="20000-50000">₦20,000 - ₦50,000</option>
-                                <option value="50000-100000">₦50,000 - ₦100,000</option>
-                                <option value="100000+">Over ₦100,000</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <!-- Vehicle 1 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/Lexus-2020.jpg" class="card-img-top" alt="Mercedes-Benz S-Class">
-                                <span class="product-status status-featured">Featured</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">2023 Mercedes-Benz S-Class</h5>
-                                <div class="product-price">995,000</div>
-                                <div class="product-features">
-                                    <div class="product-feature">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                        <span>12,500 mi</span>
-                                    </div>
-                                    <div class="product-feature">
-                                        <i class="fas fa-car"></i>
-                                        <span>Automatic</span>
-                                    </div>
-                                    <div class="product-feature">
-                                        <i class="fas fa-gas-pump"></i>
-                                        <span>Hybrid</span>
-                                    </div>
-                                </div>
-                                <p class="card-text">Luxury redefined with advanced technology, premium comfort, and exceptional performance.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="2023 Mercedes-Benz S-Class - $95,000">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%202023%20Mercedes-Benz%20S-Class%20for%20%2495%2C000.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Vehicle 2 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/highlander-2020.jpg" class="card-img-top" alt="BMW X5">
-                                <span class="product-status status-new">New</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">2024 BMW X5 xDrive40i</h5>
-                                <div class="product-price">₦68,500</div>
-                                <div class="product-features">
-                                    <div class="product-feature">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                        <span>5,200 mi</span>
-                                    </div>
-                                    <div class="product-feature">
-                                        <i class="fas fa-car"></i>
-                                        <span>Automatic</span>
-                                    </div>
-                                    <div class="product-feature">
-                                        <i class="fas fa-gas-pump"></i>
-                                        <span>Petrol</span>
-                                    </div>
-                                </div>
-                                <p class="card-text">Sporty luxury SUV with premium features, advanced safety, and powerful performance.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="2024 BMW X5 xDrive40i - $68,500">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%202024%20BMW%20X5%20xDrive40i%20for%20%2468%2C500.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Vehicle 3 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/2020-Prado.jpg" class="card-img-top" alt="Toyota Camry">
-                                <span class="product-status status-used">Certified</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">2022 Toyota Camry SE</h5>
-                                <div class="product-price">₦599800</div>
-                                <div class="product-features">
-                                    <div class="product-feature">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                        <span>22,300 mi</span>
-                                    </div>
-                                    <div class="product-feature">
-                                        <i class="fas fa-car"></i>
-                                        <span>Automatic</span>
-                                    </div>
-                                    <div class="product-feature">
-                                        <i class="fas fa-gas-pump"></i>
-                                        <span>Hybrid</span>
-                                    </div>
-                                </div>
-                                <p class="card-text">Reliable family sedan with excellent fuel economy and modern safety features.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="2022 Toyota Camry SE - $25,800">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%202022%20Toyota%20Camry%20SE%20for%20%2425%2C800.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Inquire on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Spare Parts Section -->
-            <div class="products-container" id="parts-container">
-                <h2 class="section-title">Genuine Spare Parts</h2>
-                
-                <div class="row">
-                    <!-- Part 1 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="data:image/jpeg;base64,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" class="card-img-top" alt="Brake Pads">
-                                <span class="product-status status-sale">Sale</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">Premium Brake Pads Set</h5>
-                                <div class="product-price">₦86000</div>
-                                <div class="part-compatibility">
-                                    <i class="fas fa-car"></i> Compatible with: Toyota, Honda, Nissan
-                                </div>
-                                <div class="stock-status in-stock">
-                                    <i class="fas fa-check-circle"></i> In Stock (25+)
-                                </div>
-                                <p class="card-text">High-performance ceramic brake pads for superior stopping power and reduced noise.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="Premium Brake Pads Set - $89.99">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%20Premium%20Brake%20Pads%20Set%20for%20%2489.99.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Order on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Part 2 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1622737133809-d95047b9e673?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Oil Filter">
-                                <span class="product-status status-new">New</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">Synthetic Oil Filter</h5>
-                                <div class="product-price">₦24000</div>
-                                <div class="part-compatibility">
-                                    <i class="fas fa-car"></i> Compatible with: Most European Models
-                                </div>
-                                <div class="stock-status in-stock">
-                                    <i class="fas fa-check-circle"></i> In Stock (50+)
-                                </div>
-                                <p class="card-text">High-efficiency oil filter for synthetic oils, provides superior engine protection.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="Synthetic Oil Filter - $24.99">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%20Synthetic%20Oil%20Filter%20for%20%2424.99.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Order on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Part 3 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="data:image/jpeg;base64,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" class="card-img-top" alt="Car Battery">
-                                <span class="product-status status-featured">Featured</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">48V Hybrid Battery</h5>
-                                <div class="product-price">₦1,299.99</div>
-                                <div class="part-compatibility">
-                                    <i class="fas fa-car"></i> Compatible with: Mercedes, Audi, BMW Hybrid
-                                </div>
-                                <div class="stock-status low-stock">
-                                    <i class="fas fa-exclamation-triangle"></i> Low Stock (3 left)
-                                </div>
-                                <p class="card-text">OEM replacement 48V lithium-ion battery for mild hybrid systems.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="48V Hybrid Battery - $1,299.99">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%2048V%20Hybrid%20Battery%20for%20%241%2C299.99.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Order on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Accessories Section -->
-            <div class="products-container" id="accessories-container">
-                <h2 class="section-title">Premium Accessories</h2>
-                
-                <div class="row">
-                    <!-- Accessory 1 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Car Cover">
-                                <span class="product-status status-sale">20% Off</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">All-Weather Car Cover</h5>
-                                <div class="product-price">₦149.99 <small class="text-muted text-decoration-line-through">$187.99</small></div>
-                                <div class="part-compatibility">
-                                    <i class="fas fa-car"></i> Universal Fit - All Car Sizes
-                                </div>
-                                <div class="stock-status in-stock">
-                                    <i class="fas fa-check-circle"></i> In Stock
-                                </div>
-                                <p class="card-text">Waterproof, UV-resistant car cover with soft inner lining to protect your vehicle's paint.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="All-Weather Car Cover - $149.99">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%20All-Weather%20Car%20Cover%20for%20%24149.99.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Order on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Accessory 2 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Floor Mats">
-                                <span class="product-status status-new">New</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">Premium Rubber Floor Mats</h5>
-                                <div class="product-price">$79.99</div>
-                                <div class="part-compatibility">
-                                    <i class="fas fa-car"></i> Custom Fit for SUV Models
-                                </div>
-                                <div class="stock-status in-stock">
-                                    <i class="fas fa-check-circle"></i> In Stock
-                                </div>
-                                <p class="card-text">Heavy-duty rubber floor mats with deep channels to trap water, mud, and debris.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="Premium Rubber Floor Mats - $79.99">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%20Premium%20Rubber%20Floor%20Mats%20for%20%2479.99.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Order on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Accessory 3 -->
-                    <div class="col-md-4">
-                        <div class="card product-card">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1563720223485-41b7d1255d70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Phone Holder">
-                                <span class="product-status status-featured">Bestseller</span>
-                                <button class="wishlist-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">Magnetic Phone Holder</h5>
-                                <div class="product-price">$29.99</div>
-                                <div class="part-compatibility">
-                                    <i class="fas fa-car"></i> Universal - All Vehicles
-                                </div>
-                                <div class="stock-status in-stock">
-                                    <i class="fas fa-check-circle"></i> In Stock
-                                </div>
-                                <p class="card-text">Strong magnetic phone mount with 360° rotation for perfect viewing angles.</p>
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary view-details" data-product="Magnetic Phone Holder - $29.99">View Details</button>
-                                    <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I'm%20interested%20in%20the%20Magnetic%20Phone%20Holder%20for%20%2429.99.%20Please%20provide%20more%20details." 
-                                       class="btn btn-whatsapp" 
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> Order on WhatsApp
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center mt-5">
-                <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I%20want%20to%20browse%20all%20your%20products%20and%20make%20an%20inquiry." 
-                   class="btn btn-whatsapp btn-lg" 
-                   target="_blank">
-                    <i class="fab fa-whatsapp"></i> Browse All Products on WhatsApp
-                </a>
-            </div>
-        </div>
-    </section>
+      <div class="products-grid">
+        <article class="product-card" data-product-card data-category="vehicle">
+          <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/Lexus-2020.jpg" alt="Lexus LX" />
+          <div class="product-body">
+            <span class="badge">Vehicle</span>
+            <h3>2020 Lexus LX 570</h3>
+            <p>Luxury full-size SUV with premium comfort and high-road presence.</p>
+            <div class="price">NGN 95,000,000</div>
+            <div class="actions"><a class="btn details" href="#">Details</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20am%20interested%20in%202020%20Lexus%20LX%20570">Order</a></div>
+          </div>
+        </article>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-md-3 col-6 stat-item">
-                    <div class="stat-number">500+</div>
-                    <div class="stat-label">Vehicles in Stock</div>
-                </div>
-                <div class="col-md-3 col-6 stat-item">
-                    <div class="stat-number">5,000+</div>
-                    <div class="stat-label">Parts Available</div>
-                </div>
-                <div class="col-md-3 col-6 stat-item">
-                    <div class="stat-number">98%</div>
-                    <div class="stat-label">Customer Satisfaction</div>
-                </div>
-                <div class="col-md-3 col-6 stat-item">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">WhatsApp Support</div>
-                </div>
-            </div>
-        </div>
-    </section>
+        <article class="product-card" data-product-card data-category="vehicle">
+          <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/highlander-2020.jpg" alt="Toyota Highlander" />
+          <div class="product-body">
+            <span class="badge">Vehicle</span>
+            <h3>2020 Toyota Highlander</h3>
+            <p>Family SUV with balanced performance and interior practicality.</p>
+            <div class="price">NGN 42,500,000</div>
+            <div class="actions"><a class="btn details" href="#">Details</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20am%20interested%20in%202020%20Toyota%20Highlander">Order</a></div>
+          </div>
+        </article>
 
-    <!-- Features Section -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="section-title">Why Choose Biltronix Auto Store</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <i class="fas fa-search"></i>
-                        <h4>Quality Guaranteed</h4>
-                        <p>All vehicles and parts undergo comprehensive inspection to ensure quality and reliability.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <i class="fab fa-whatsapp"></i>
-                        <h4>Instant WhatsApp Support</h4>
-                        <p>Get instant responses and personalized assistance through WhatsApp for all your inquiries.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-box">
-                        <i class="fas fa-handshake"></i>
-                        <h4>Expert Support</h4>
-                        <p>Automotive experts available to help you choose the right products for your needs.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        <article class="product-card" data-product-card data-category="vehicle">
+          <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/2020-Prado.jpg" alt="Toyota Prado" />
+          <div class="product-body">
+            <span class="badge">Vehicle</span>
+            <h3>2020 Toyota Prado</h3>
+            <p>Strong off-road capability with executive-grade cabin comfort.</p>
+            <div class="price">NGN 68,900,000</div>
+            <div class="actions"><a class="btn details" href="#">Details</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20am%20interested%20in%202020%20Toyota%20Prado">Order</a></div>
+          </div>
+        </article>
 
-    <!-- Testimonials Section -->
-    <section class="py-5 bg-light" id="testimonials">
-        <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="testimonial-card">
-                        <div class="testimonial-text">
-                            "Found the perfect brake pads for my Mercedes through WhatsApp. Fast response and perfect fit!"
-                        </div>
-                        <div class="testimonial-author">- James O.</div>
-                        <div class="rating">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="testimonial-card">
-                        <div class="testimonial-text">
-                            "The WhatsApp service made car buying so easy. Got all my questions answered instantly!"
-                        </div>
-                        <div class="testimonial-author">- Sarah T.</div>
-                        <div class="rating">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="testimonial-card">
-                        <div class="testimonial-text">
-                            "Professional service through WhatsApp. Will definitely shop here again for all my car needs."
-                        </div>
-                        <div class="testimonial-author">- Michael B.</div>
-                        <div class="rating">
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                            <i class="fas fa-star text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        <article class="product-card" data-product-card data-category="part">
+          <img src="https://images.unsplash.com/photo-1580974928064-f0aeef70895a?auto=format&fit=crop&w=1000&q=80" alt="Brake kit" />
+          <div class="product-body">
+            <span class="badge">Car Part</span>
+            <h3>Front Brake Kit</h3>
+            <p>OEM-grade brake pad and disc set for select Toyota/Lexus models.</p>
+            <div class="price">NGN 169,000</div>
+            <div class="actions"><a class="btn details" href="#">Fitment</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20need%20Front%20Brake%20Kit">Order</a></div>
+          </div>
+        </article>
 
-    <!-- Contact Section -->
-    <section class="py-5" id="contact">
-        <div class="container">
-            <h2 class="section-title">Contact Us</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="contact-info">
-                        <h4>Get In Touch</h4>
-                        <p>Need help finding the right part or vehicle? Contact our experts for personalized assistance.</p>
-                        
-                        <div class="contact-info">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <strong>Address:</strong> 123 Automotive Avenue, Lagos, Nigeria
-                        </div>
-                        <div class="contact-info">
-                            <i class="fas fa-phone"></i>
-                            <strong>Phone:</strong> +234 706 088 2711
-                        </div>
-                        <div class="contact-info">
-                            <i class="fab fa-whatsapp"></i>
-                            <strong>WhatsApp:</strong> +234 706 088 2711
-                        </div>
-                        <div class="contact-info">
-                            <i class="fas fa-envelope"></i>
-                            <strong>Email:</strong> biltronixtech@gmail.com
-                        </div>
-                        <div class="contact-info">
-                            <i class="far fa-clock"></i>
-                            <strong>Working Hours:</strong> Mon - Sat: 09:00 AM - 07:00 PM
-                        </div>
-                        
-                        <div class="social-icons mt-4">
-                            <a href="#"><i class="fab fa-facebook"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                            <a href="https://wa.me/2347060882711" target="_blank"><i class="fab fa-whatsapp"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="contact-form">
-                        <h4>Send Us a Message</h4>
-                        <p class="text-muted mb-3">Or contact us directly on WhatsApp for faster response:</p>
-                        <a href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Auto%20Store!%20I%20have%20a%20question." 
-                           class="btn btn-whatsapp w-100 mb-4" 
-                           target="_blank">
-                            <i class="fab fa-whatsapp"></i> Chat on WhatsApp Now
-                        </a>
-                        <form id="contactForm">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="name" class="form-label">Full Name</label>
-                                        <input type="text" class="form-control" id="name" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="phone" class="form-label">Phone Number</label>
-                                        <input type="tel" class="form-control" id="phone" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email">
-                            </div>
-                            <div class="mb-3">
-                                <label for="category" class="form-label">Product Category</label>
-                                <select class="form-select" id="category">
-                                    <option value="">Select category</option>
-                                    <option value="vehicles">Vehicles</option>
-                                    <option value="parts">Spare Parts</option>
-                                    <option value="accessories">Accessories</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="message" class="form-label">Message</label>
-                                <textarea class="form-control" id="message" rows="4" placeholder="Tell us about your requirements..."></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Send Message</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        <article class="product-card" data-product-card data-category="part">
+          <img src="https://images.pexels.com/photos/9543369/pexels-photo-9543369.jpeg?auto=compress&cs=tinysrgb&w=1000" alt="Battery" />
+          <div class="product-body">
+            <span class="badge">Car Part</span>
+            <h3>70Ah Maintenance-Free Battery</h3>
+            <p>Long-life battery with strong cranking performance and warranty.</p>
+            <div class="price">NGN 132,000</div>
+            <div class="actions"><a class="btn details" href="#">Specs</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20need%20the%2070Ah%20Battery">Order</a></div>
+          </div>
+        </article>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5 class="footer-heading">Biltronix Auto Store</h5>
-                    <p>Your one-stop shop for vehicles, genuine spare parts, and quality accessories. Quality guaranteed.</p>
-                    <a href="https://wa.me/2347060882711" class="btn btn-whatsapp btn-sm mt-2" target="_blank">
-                        <i class="fab fa-whatsapp"></i> Chat on WhatsApp
-                    </a>
-                </div>
-                <div class="col-md-2">
-                    <h5 class="footer-heading">Shop</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#vehicles">Vehicles</a></li>
-                        <li><a href="#parts">Spare Parts</a></li>
-                        <li><a href="#accessories">Accessories</a></li>
-                        <li><a href="../biltronix-automotive.html">Auto Services</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5 class="footer-heading">Categories</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#">Braking Systems</a></li>
-                        <li><a href="#">Engine Parts</a></li>
-                        <li><a href="#">Interior Accessories</a></li>
-                        <li><a href="#">Exterior Protection</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5 class="footer-heading">Contact Info</h5>
-                    <div class="contact-info">
-                        <i class="fas fa-map-marker-alt"></i> 123 Automotive Avenue, Lagos
-                    </div>
-                    <div class="contact-info">
-                        <i class="fas fa-phone"></i> +234 706 088 2711
-                    </div>
-                    <div class="contact-info">
-                        <i class="fab fa-whatsapp"></i> +234 706 088 2711
-                    </div>
-                    <div class="contact-info">
-                        <i class="far fa-clock"></i> Mon - Sat: 09:00 AM - 07:00 PM
-                    </div>
-                </div>
-            </div>
-            <hr class="mt-4 mb-4">
-            <div class="row">
-                <div class="col-md-6">
-                    <p>&copy; 2025 Biltronix Auto Store. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <a href="#" class="me-3">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+        <article class="product-card" data-product-card data-category="part">
+          <img src="https://images.unsplash.com/photo-1622737133809-d95047b9e673?auto=format&fit=crop&w=1000&q=80" alt="Oil filter" />
+          <div class="product-body">
+            <span class="badge">Car Part</span>
+            <h3>Synthetic Oil Filter</h3>
+            <p>High-flow performance filter for clean lubrication and engine life.</p>
+            <div class="price">NGN 24,990</div>
+            <div class="actions"><a class="btn details" href="#">Specs</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20need%20Synthetic%20Oil%20Filter">Order</a></div>
+          </div>
+        </article>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Category tabs functionality
-        document.querySelectorAll('.category-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs
-                document.querySelectorAll('.category-tab').forEach(t => {
-                    t.classList.remove('active');
-                });
-                
-                // Add active class to clicked tab
-                this.classList.add('active');
-                
-                // Hide all product containers
-                document.querySelectorAll('.products-container').forEach(container => {
-                    container.classList.remove('active');
-                });
-                
-                // Show the selected category's products
-                const category = this.getAttribute('data-category');
-                document.getElementById(`${category}-container`).classList.add('active');
-            });
-        });
-        
-        // Simple form submission handler
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Thank you for your inquiry! Our team will contact you shortly.');
-            this.reset();
-        });
-        
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                if(targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if(targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 100,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-        
-        // Wishlist functionality
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const icon = this.querySelector('i');
-                if(icon.classList.contains('far')) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                    this.style.background = 'var(--secondary)';
-                    this.style.color = 'white';
-                    alert('Added to wishlist!');
-                } else {
-                    icon.classList.remove('fas');
-                    icon.classList.add('far');
-                    this.style.background = 'rgba(255,255,255,0.9)';
-                    this.style.color = 'inherit';
-                    alert('Removed from wishlist!');
-                }
-            });
-        });
-        
-        // View details functionality
-        document.querySelectorAll('.view-details').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const product = this.getAttribute('data-product');
-                alert(`Product Details: ${product}\n\nIn a full implementation, this would open a detailed product page with specifications, photos, and more information.`);
-            });
-        });
-        
-        // Auto-generate WhatsApp links for products
-        function generateWhatsAppLink(productName, price) {
-            const message = `Hello Biltronix Auto Store! I'm interested in ${productName} for ${price}. Please provide more details.`;
-            return `https://wa.me/2347060882711?text=${encodeURIComponent(message)}`;
-        }
-    </script>
+        <article class="product-card" data-product-card data-category="accessory">
+          <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1000&q=80" alt="Dashcam" />
+          <div class="product-body">
+            <span class="badge">Accessory</span>
+            <h3>Dual Dash Camera</h3>
+            <p>Front and cabin camera with night mode and loop recording support.</p>
+            <div class="price">NGN 89,000</div>
+            <div class="actions"><a class="btn details" href="#">Details</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20want%20Dual%20Dash%20Camera">Order</a></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-product-card data-category="accessory">
+          <img src="https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1000&q=80" alt="Seat covers" />
+          <div class="product-body">
+            <span class="badge">Accessory</span>
+            <h3>Premium Seat Cover Set</h3>
+            <p>Durable seat protection with tailored fit and premium finish.</p>
+            <div class="price">NGN 220,000</div>
+            <div class="actions"><a class="btn details" href="#">Details</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20want%20Premium%20Seat%20Cover%20Set">Order</a></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-product-card data-category="accessory">
+          <img src="https://images.pexels.com/photos/6347729/pexels-photo-6347729.jpeg?auto=compress&cs=tinysrgb&w=1000" alt="Phone holder" />
+          <div class="product-body">
+            <span class="badge">Accessory</span>
+            <h3>Magnetic Phone Holder</h3>
+            <p>Secure dashboard mount with 360-degree adjustment.</p>
+            <div class="price">NGN 29,990</div>
+            <div class="actions"><a class="btn details" href="#">Details</a><a class="btn whatsapp" target="_blank" href="https://wa.me/2347060882711?text=I%20want%20Magnetic%20Phone%20Holder">Order</a></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <a class="floating-wa" href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Store!%20I%20want%20to%20buy." target="_blank" title="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+
+  <footer>Biltronix Store | All Products, then Filter by Vehicle, Parts, or Accessories</footer>
 </body>
 </html>
+
