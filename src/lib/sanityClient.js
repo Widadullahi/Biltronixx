@@ -100,6 +100,7 @@ function normalizeStockItem(item) {
   return {
     _id: item._id,
     name: item.name || 'Untitled Item',
+    description: item.description || '',
     category: item.category || 'car-parts',
     stock: toNumber(item.stock),
     sold: toNumber(item.sold),
@@ -188,6 +189,7 @@ export async function fetchStockItems(limit = 300) {
     `*[_type == "stockItem"] | order(category asc, name asc)[0...${limit}]{
       _id,
       name,
+      description,
       category,
       stock,
       sold,
@@ -214,6 +216,7 @@ export async function createStockItem(payload) {
   const created = await sanityWriteClient.create({
     _type: 'stockItem',
     name: payload.name,
+    description: payload.description || '',
     category: payload.category,
     stock: toNumber(payload.stock),
     sold: toNumber(payload.sold),
@@ -240,6 +243,7 @@ export async function updateStockItem(itemId, updates) {
     .patch(itemId)
     .set({
       name: updates.name,
+      description: updates.description || '',
       stock: toNumber(updates.stock),
       sold: toNumber(updates.sold),
       unitPrice: toNumber(updates.unitPrice),
@@ -292,6 +296,7 @@ function normalizeInspectorAccount(item) {
     companyName: item.companyName || '',
     companyAddress: item.companyAddress || '',
     signatureDataUrl: item.signatureDataUrl || '',
+    companyLogoDataUrl: item.companyLogoDataUrl || '',
   };
 }
 
@@ -320,13 +325,62 @@ export async function createInspectorAccount(payload) {
     _type: 'inspectorAccount',
     fullName: payload.fullName,
     email: payload.email,
+    password: payload.password,
     phone: payload.phone,
     companyName: payload.companyName,
     companyAddress: payload.companyAddress,
     signatureDataUrl: payload.signatureDataUrl || '',
+    companyLogoDataUrl: payload.companyLogoDataUrl || '',
   });
 
   return normalizeInspectorAccount(created);
+}
+
+export async function loginInspectorAccount(email, password) {
+  if (!sanityClient) {
+    throw new Error('Missing Sanity config.');
+  }
+
+  const doc = await sanityClient.fetch(
+    `*[_type == "inspectorAccount" && email == $email && password == $password][0]{
+      _id,
+      fullName,
+      email,
+      phone,
+      companyName,
+      companyAddress,
+      signatureDataUrl,
+      companyLogoDataUrl
+    }`,
+    { email, password }
+  );
+
+  if (!doc) {
+    throw new Error('Invalid email or password.');
+  }
+
+  return normalizeInspectorAccount(doc);
+}
+
+export async function updateInspectorAccount(accountId, updates) {
+  if (!sanityWriteClient) {
+    throw new Error('Missing write token for account update.');
+  }
+
+  const patched = await sanityWriteClient
+    .patch(accountId)
+    .set({
+      fullName: updates.fullName || '',
+      email: updates.email || '',
+      phone: updates.phone || '',
+      companyName: updates.companyName || '',
+      companyAddress: updates.companyAddress || '',
+      signatureDataUrl: updates.signatureDataUrl || '',
+      companyLogoDataUrl: updates.companyLogoDataUrl || '',
+    })
+    .commit();
+
+  return normalizeInspectorAccount(patched);
 }
 
 export async function createInspectionReport(payload) {

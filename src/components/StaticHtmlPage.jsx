@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createBookingRequest, fetchCarTips, fetchStoreHighlights } from '../lib/sanityClient.js';
+import { fetchCarTips, fetchStoreHighlights } from '../lib/sanityClient.js';
 
 const FALLBACK_CAR_TIPS = [
   {
@@ -42,6 +42,8 @@ const FALLBACK_STORE_HIGHLIGHTS = [
     ctaHref: '/sales#products',
   },
 ];
+
+const WHATSAPP_NUMBER = '2347060882711';
 
 function extractPageParts(html) {
   const parser = new DOMParser();
@@ -129,6 +131,12 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
     const root = containerRef.current;
     if (!root) return undefined;
     const cleanupTasks = [];
+    const toSlug = (value) =>
+      String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
 
     const applyStoreFilters = () => {
       const activeFilter = root.dataset.activeFilter || 'all';
@@ -162,36 +170,33 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       if (form.id === 'bookingForm') {
         event.preventDefault();
         const formData = new FormData(form);
-        const bookingPayload = {
-          customer: String(formData.get('fullName') || '').trim(),
-          whatsappNumber: String(formData.get('whatsappNumber') || '').trim(),
-          vehicle: String(formData.get('vehicle') || '').trim(),
-          service: String(formData.get('service') || '').trim(),
-          date: String(formData.get('appointmentDate') || '').trim(),
-          email: String(formData.get('email') || '').trim(),
-          note: String(formData.get('note') || '').trim(),
-        };
+        const fullName = String(formData.get('fullName') || '').trim();
+        const whatsappNumber = String(formData.get('whatsappNumber') || '').trim();
+        const vehicle = String(formData.get('vehicle') || '').trim();
+        const service = String(formData.get('service') || '').trim();
+        const appointmentDate = String(formData.get('appointmentDate') || '').trim();
+        const email = String(formData.get('email') || '').trim();
+        const note = String(formData.get('note') || '').trim();
 
-        createBookingRequest(bookingPayload)
-          .then(() => {
-            setPopup({
-              open: true,
-              title: 'Booking Request Received',
-              message:
-                'Thank you for your booking request. We will get in touch via WhatsApp once an admin confirms your appointment.',
-            });
-            form.reset();
-          })
-          .catch((submitError) => {
-            setPopup({
-              open: true,
-              title: 'Booking Not Submitted',
-              message:
-                submitError instanceof Error
-                  ? submitError.message
-                  : 'Could not submit booking now. Please try again in a moment.',
-            });
-          });
+        const message = [
+          'Hello Biltronix, I want to book an appointment.',
+          `Name: ${fullName || '-'}`,
+          `My WhatsApp: ${whatsappNumber || '-'}`,
+          `Vehicle: ${vehicle || '-'}`,
+          `Service: ${service || '-'}`,
+          `Preferred Date: ${appointmentDate || '-'}`,
+          `Email: ${email || '-'}`,
+          `Note: ${note || '-'}`,
+        ].join('\n');
+
+        const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
+        setPopup({
+          open: true,
+          title: 'Opening WhatsApp',
+          message: 'Your booking details are ready. Please send the message in WhatsApp to complete your request.',
+        });
+        form.reset();
       }
       if (form.id === 'contactForm') {
         event.preventDefault();
@@ -279,6 +284,22 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       if (filterBtn instanceof HTMLElement) {
         const filterValue = filterBtn.getAttribute('data-filter');
         if (filterValue) setActiveFilter(filterValue);
+      }
+
+      const inquireBtn = target.closest('.btn.whatsapp');
+      if (inquireBtn instanceof HTMLAnchorElement) {
+        const card = inquireBtn.closest('[data-product-card]');
+        if (card instanceof HTMLElement) {
+          event.preventDefault();
+          const productName = card.querySelector('h3')?.textContent?.trim() || 'this item';
+          const slug = toSlug(productName);
+          const itemId = `item-${slug || 'product'}`;
+          if (!card.id) card.id = itemId;
+          const itemUrl = `${window.location.origin}/sales#${card.id}`;
+          const msg = `Hello Biltronix, I want to inquire about ${productName}.\nItem Link: ${itemUrl}`;
+          const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+          window.open(waUrl, '_blank', 'noopener,noreferrer');
+        }
       }
     };
 

@@ -4,7 +4,6 @@ import {
   createStockItem,
   fetchAdminDashboardData,
   fetchStockItems,
-  hasSanityConfig,
   updateStockItem,
 } from '../lib/sanityClient.js';
 import './AdminDashboardPage.css';
@@ -61,16 +60,18 @@ export default function AdminDashboardPage() {
   const [stockMessage, setStockMessage] = useState('');
   const [savingItemId, setSavingItemId] = useState('');
   const [newItemName, setNewItemName] = useState('');
-  const [newItemStock, setNewItemStock] = useState('0');
-  const [newItemSold, setNewItemSold] = useState('0');
-  const [newItemUnitPrice, setNewItemUnitPrice] = useState('0');
+  const [newItemDescription, setNewItemDescription] = useState('');
+  const [newItemUnitPrice, setNewItemUnitPrice] = useState('');
   const [newVehicleMake, setNewVehicleMake] = useState('');
   const [newVehicleModel, setNewVehicleModel] = useState('');
+  const [newVehicleDescription, setNewVehicleDescription] = useState('');
   const [newVehicleYear, setNewVehicleYear] = useState(String(new Date().getFullYear()));
   const [newVehicleCondition, setNewVehicleCondition] = useState(VEHICLE_CONDITIONS[0]);
   const [newVehicleTransmission, setNewVehicleTransmission] = useState(VEHICLE_TRANSMISSIONS[0]);
   const [newVehicleFuelType, setNewVehicleFuelType] = useState(VEHICLE_FUEL_TYPES[0]);
   const [showVehicleForm, setShowVehicleForm] = useState(false);
+  const [showCarPartForm, setShowCarPartForm] = useState(false);
+  const [showAccessoriesForm, setShowAccessoriesForm] = useState(false);
 
   const todayIso = useMemo(() => new Date().toISOString().split('T')[0], []);
 
@@ -204,12 +205,10 @@ export default function AdminDashboardPage() {
 
   const vehicleStats = useMemo(() => {
     const vehicles = stockItems.filter((item) => item.category === 'vehicle');
-    const totalStock = vehicles.reduce((sum, item) => sum + item.stock, 0);
-    const totalSold = vehicles.reduce((sum, item) => sum + item.sold, 0);
     const newCount = vehicles.filter((item) => item.condition === 'New').length;
     const foreignUsedCount = vehicles.filter((item) => item.condition === 'Foreign Used').length;
     const nigerianUsedCount = vehicles.filter((item) => item.condition === 'Nigerian Used').length;
-    return { totalVehicles: vehicles.length, totalStock, totalSold, newCount, foreignUsedCount, nigerianUsedCount };
+    return { totalVehicles: vehicles.length, newCount, foreignUsedCount, nigerianUsedCount };
   }, [stockItems]);
 
   const saveStockRow = async (item) => {
@@ -242,9 +241,10 @@ export default function AdminDashboardPage() {
         const vehicleName = `${newVehicleYear} ${newVehicleMake.trim()} ${newVehicleModel.trim()}`.trim();
         payload = {
           name: vehicleName,
+          description: newVehicleDescription.trim(),
           category: activeStockCategory,
-          stock: newItemStock,
-          sold: newItemSold,
+          stock: 0,
+          sold: 0,
           unitPrice: newItemUnitPrice,
           make: newVehicleMake.trim(),
           model: newVehicleModel.trim(),
@@ -259,9 +259,10 @@ export default function AdminDashboardPage() {
         }
         payload = {
           name: newItemName.trim(),
+          description: newItemDescription.trim(),
           category: activeStockCategory,
-          stock: newItemStock,
-          sold: newItemSold,
+          stock: 0,
+          sold: 0,
           unitPrice: newItemUnitPrice,
         };
       }
@@ -271,19 +272,27 @@ export default function AdminDashboardPage() {
       });
       setStockItems((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
       setNewItemName('');
-      setNewItemStock('0');
-      setNewItemSold('0');
-      setNewItemUnitPrice('0');
+      setNewItemDescription('');
+      setNewItemUnitPrice('');
       setNewVehicleMake('');
       setNewVehicleModel('');
+      setNewVehicleDescription('');
       setNewVehicleYear(String(new Date().getFullYear()));
       setNewVehicleCondition(VEHICLE_CONDITIONS[0]);
       setNewVehicleTransmission(VEHICLE_TRANSMISSIONS[0]);
       setNewVehicleFuelType(VEHICLE_FUEL_TYPES[0]);
       setShowVehicleForm(false);
+      setShowCarPartForm(false);
+      setShowAccessoriesForm(false);
       setStockMessage(`${created.name} added.`);
     } catch (createError) {
-      setStockError(createError instanceof Error ? createError.message : 'Could not add stock item.');
+      const fallbackMessage = 'Could not add stock item.';
+      const rawMessage = createError instanceof Error ? createError.message : fallbackMessage;
+      if (rawMessage.includes('Missing write token')) {
+        setStockError('Write access is not configured. Add VITE_SANITY_API_WRITE_TOKEN in .env and restart the app.');
+      } else {
+        setStockError(rawMessage || fallbackMessage);
+      }
     } finally {
       setSavingItemId('');
     }
@@ -291,9 +300,9 @@ export default function AdminDashboardPage() {
 
   const handlePanelChange = (panel) => {
     setActivePanel(panel);
-    if (panel !== 'vehicle') {
-      setShowVehicleForm(false);
-    }
+    if (panel !== 'vehicle') setShowVehicleForm(false);
+    if (panel !== 'car-parts') setShowCarPartForm(false);
+    if (panel !== 'accessories') setShowAccessoriesForm(false);
     if (window.matchMedia('(max-width: 960px)').matches) {
       setSidebarOpen(false);
     }
@@ -308,18 +317,6 @@ export default function AdminDashboardPage() {
           onClick={() => handlePanelChange('overview')}
         >
           <i className='fas fa-gauge-high' /> Overview
-        </button>
-        <button
-          className={`admin-nav-btn ${activePanel === 'bookings' ? 'active' : ''}`}
-          onClick={() => handlePanelChange('bookings')}
-        >
-          <i className='fas fa-calendar-days' /> Bookings
-        </button>
-        <button
-          className={`admin-nav-btn ${activePanel === 'orders' ? 'active' : ''}`}
-          onClick={() => handlePanelChange('orders')}
-        >
-          <i className='fas fa-box-open' /> Orders
         </button>
         {/*
         <button
@@ -373,9 +370,6 @@ export default function AdminDashboardPage() {
           </div>
           <p>Track bookings, orders, and inventory from one place.</p>
           <div className='admin-data-state'>
-            <span className={`status-pill ${error ? 'error' : hasSanityConfig ? 'ok' : 'warn'}`}>
-              {error ? 'Sanity Error' : hasSanityConfig ? 'Sanity Connected' : 'Sanity Not Configured'}
-            </span>
             <button className='admin-refresh-btn' type='button' onClick={loadDashboardData} disabled={isLoading}>
               {isLoading ? 'Refreshing...' : 'Refresh Data'}
             </button>
@@ -606,7 +600,7 @@ export default function AdminDashboardPage() {
         {(activePanel === 'vehicle' || activePanel === 'car-parts' || activePanel === 'accessories') && (
           <section className='admin-card'>
             <h2>{activeStockMeta?.label} Stock Manager</h2>
-            <p className='inv-threshold'>Add items, update stock, and mark units sold.</p>
+            <p className='inv-threshold'>Add items and update stock.</p>
 
             {activePanel === 'vehicle' && (
               <section className='admin-grid'>
@@ -621,31 +615,29 @@ export default function AdminDashboardPage() {
                 </article>
                 <article className='admin-card metric'>
                   <div className='metric-icon'>
-                    <i className='fas fa-layer-group' />
+                    <i className='fas fa-certificate' />
                   </div>
                   <div>
-                    <div className='metric-value'>{vehicleStats.totalStock}</div>
-                    <div className='metric-label'>Units in Stock</div>
+                    <div className='metric-value'>{vehicleStats.newCount}</div>
+                    <div className='metric-label'>New</div>
                   </div>
                 </article>
                 <article className='admin-card metric'>
                   <div className='metric-icon'>
-                    <i className='fas fa-check-circle' />
+                    <i className='fas fa-globe-africa' />
                   </div>
                   <div>
-                    <div className='metric-value'>{vehicleStats.totalSold}</div>
-                    <div className='metric-label'>Total Sold</div>
+                    <div className='metric-value'>{vehicleStats.foreignUsedCount}</div>
+                    <div className='metric-label'>Foreign Used</div>
                   </div>
                 </article>
                 <article className='admin-card metric'>
                   <div className='metric-icon'>
-                    <i className='fas fa-tags' />
+                    <i className='fas fa-flag' />
                   </div>
                   <div>
-                    <div className='metric-value'>
-                      {vehicleStats.newCount}/{vehicleStats.foreignUsedCount}/{vehicleStats.nigerianUsedCount}
-                    </div>
-                    <div className='metric-label'>New / Foreign Used / Nigerian Used</div>
+                    <div className='metric-value'>{vehicleStats.nigerianUsedCount}</div>
+                    <div className='metric-label'>Nigerian Used</div>
                   </div>
                 </article>
               </section>
@@ -657,144 +649,38 @@ export default function AdminDashboardPage() {
                   <button
                     className='admin-refresh-btn'
                     type='button'
-                    onClick={() => setShowVehicleForm((prev) => !prev)}
+                    onClick={() => {
+                      setShowVehicleForm(true);
+                      setShowCarPartForm(false);
+                      setShowAccessoriesForm(false);
+                    }}
                     disabled={savingItemId === 'new'}
                   >
-                    {showVehicleForm ? 'Close Vehicle Form' : 'Add Vehicle'}
+                    Add Vehicle
                   </button>
                   <button className='admin-refresh-btn' type='button' onClick={loadStockItems} disabled={stockLoading}>
                     {stockLoading ? 'Refreshing...' : 'Refresh List'}
                   </button>
                 </div>
-                {showVehicleForm && (
-                  <div className='admin-stock-form vehicle'>
-                    <input
-                      type='text'
-                      placeholder='Make (e.g. Toyota)'
-                      value={newVehicleMake}
-                      onChange={(event) => setNewVehicleMake(event.target.value)}
-                      disabled={savingItemId === 'new'}
-                    />
-                    <input
-                      type='text'
-                      placeholder='Model (e.g. Camry)'
-                      value={newVehicleModel}
-                      onChange={(event) => setNewVehicleModel(event.target.value)}
-                      disabled={savingItemId === 'new'}
-                    />
-                    <input
-                      type='number'
-                      min='1990'
-                      max='2100'
-                      placeholder='Year'
-                      value={newVehicleYear}
-                      onChange={(event) => setNewVehicleYear(event.target.value)}
-                      disabled={savingItemId === 'new'}
-                    />
-                    <select value={newVehicleCondition} onChange={(event) => setNewVehicleCondition(event.target.value)} disabled={savingItemId === 'new'}>
-                      {VEHICLE_CONDITIONS.map((condition) => (
-                        <option key={condition} value={condition}>
-                          {condition}
-                        </option>
-                      ))}
-                    </select>
-                    <select value={newVehicleTransmission} onChange={(event) => setNewVehicleTransmission(event.target.value)} disabled={savingItemId === 'new'}>
-                      {VEHICLE_TRANSMISSIONS.map((transmission) => (
-                        <option key={transmission} value={transmission}>
-                          {transmission}
-                        </option>
-                      ))}
-                    </select>
-                    <select value={newVehicleFuelType} onChange={(event) => setNewVehicleFuelType(event.target.value)} disabled={savingItemId === 'new'}>
-                      {VEHICLE_FUEL_TYPES.map((fuel) => (
-                        <option key={fuel} value={fuel}>
-                          {fuel}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type='number'
-                      min='0'
-                      placeholder='Stock'
-                      value={newItemStock}
-                      onChange={(event) => setNewItemStock(event.target.value)}
-                      disabled={savingItemId === 'new'}
-                    />
-                    <input
-                      type='number'
-                      min='0'
-                      placeholder='Sold'
-                      value={newItemSold}
-                      onChange={(event) => setNewItemSold(event.target.value)}
-                      disabled={savingItemId === 'new'}
-                    />
-                    <input
-                      type='number'
-                      min='0'
-                      placeholder='Unit Price (NGN)'
-                      value={newItemUnitPrice}
-                      onChange={(event) => setNewItemUnitPrice(event.target.value)}
-                      disabled={savingItemId === 'new'}
-                    />
-                    <button
-                      className='admin-refresh-btn'
-                      type='button'
-                      onClick={addStockItem}
-                      disabled={savingItemId === 'new'}
-                    >
-                      {savingItemId === 'new' ? 'Adding...' : activeStockMeta?.addLabel || 'Add Item'}
-                    </button>
-                    <button
-                      className='admin-refresh-btn'
-                      type='button'
-                      onClick={() => setShowVehicleForm(false)}
-                      disabled={savingItemId === 'new'}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
               </>
             ) : (
-              <div className='admin-stock-form'>
-                <input
-                  type='text'
-                  placeholder={`${activeStockMeta?.label || 'Item'} name`}
-                  value={newItemName}
-                  onChange={(event) => setNewItemName(event.target.value)}
-                  disabled={savingItemId === 'new'}
-                />
-                <input
-                  type='number'
-                  min='0'
-                  placeholder='Stock'
-                  value={newItemStock}
-                  onChange={(event) => setNewItemStock(event.target.value)}
-                  disabled={savingItemId === 'new'}
-                />
-                <input
-                  type='number'
-                  min='0'
-                  placeholder='Sold'
-                  value={newItemSold}
-                  onChange={(event) => setNewItemSold(event.target.value)}
-                  disabled={savingItemId === 'new'}
-                />
-                <input
-                  type='number'
-                  min='0'
-                  placeholder='Unit Price'
-                  value={newItemUnitPrice}
-                  onChange={(event) => setNewItemUnitPrice(event.target.value)}
-                  disabled={savingItemId === 'new'}
-                />
+              <div className='admin-stock-actions'>
                 <button
                   className='admin-refresh-btn'
                   type='button'
-                  onClick={addStockItem}
+                  onClick={() => {
+                    if (activePanel === 'car-parts') {
+                      setShowCarPartForm(true);
+                      setShowAccessoriesForm(false);
+                    } else {
+                      setShowAccessoriesForm(true);
+                      setShowCarPartForm(false);
+                    }
+                    setShowVehicleForm(false);
+                  }}
                   disabled={savingItemId === 'new'}
                 >
-                  {savingItemId === 'new' ? 'Adding...' : activeStockMeta?.addLabel || 'Add Item'}
+                  {activeStockMeta?.addLabel || 'Add Item'}
                 </button>
                 <button className='admin-refresh-btn' type='button' onClick={loadStockItems} disabled={stockLoading}>
                   {stockLoading ? 'Refreshing...' : 'Refresh List'}
@@ -814,7 +700,6 @@ export default function AdminDashboardPage() {
                     <th>Transmission</th>
                     <th>Fuel</th>
                     <th>Stock</th>
-                    <th>Sold</th>
                     <th>Unit Price</th>
                     <th>Action</th>
                   </tr>
@@ -822,7 +707,6 @@ export default function AdminDashboardPage() {
                   <tr>
                     <th>Item</th>
                     <th>Stock</th>
-                    <th>Sold</th>
                     <th>Unit Price</th>
                     <th>Action</th>
                   </tr>
@@ -924,21 +808,6 @@ export default function AdminDashboardPage() {
                         <input
                           type='number'
                           min='0'
-                          value={item.sold}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id ? { ...entry, sold: Number.parseInt(event.target.value, 10) || 0 } : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type='number'
-                          min='0'
                           value={item.unitPrice}
                           onChange={(event) =>
                             setStockItems((prev) =>
@@ -1000,21 +869,6 @@ export default function AdminDashboardPage() {
                         <input
                           type='number'
                           min='0'
-                          value={item.sold}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id ? { ...entry, sold: Number.parseInt(event.target.value, 10) || 0 } : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type='number'
-                          min='0'
                           value={item.unitPrice}
                           onChange={(event) =>
                             setStockItems((prev) =>
@@ -1043,7 +897,7 @@ export default function AdminDashboardPage() {
                 ))}
                 {stockItemsByCategory.length === 0 && !stockLoading && (
                   <tr>
-                    <td colSpan={activePanel === 'vehicle' ? 8 : 5} className='empty-row'>
+                    <td colSpan={activePanel === 'vehicle' ? 7 : 4} className='empty-row'>
                       No stock items yet for this category.
                     </td>
                   </tr>
@@ -1053,6 +907,227 @@ export default function AdminDashboardPage() {
           </section>
         )}
       </main>
+      {showVehicleForm && activePanel === 'vehicle' && (
+        <div className='admin-modal-overlay' onClick={() => (savingItemId === 'new' ? null : setShowVehicleForm(false))}>
+          <div className='admin-modal-card' onClick={(event) => event.stopPropagation()}>
+            <div className='admin-modal-head'>
+              <h3>Add New Vehicle</h3>
+              <button
+                type='button'
+                className='admin-modal-close'
+                onClick={() => setShowVehicleForm(false)}
+                disabled={savingItemId === 'new'}
+                aria-label='Close vehicle form'
+              >
+                <i className='fas fa-times' />
+              </button>
+            </div>
+            <p>Enter vehicle details, stock level, and unit price.</p>
+            <div className='admin-vehicle-modal-form'>
+              <input
+                type='text'
+                placeholder='Make (e.g. Toyota)'
+                value={newVehicleMake}
+                onChange={(event) => setNewVehicleMake(event.target.value)}
+                disabled={savingItemId === 'new'}
+              />
+              <input
+                type='text'
+                placeholder='Model (e.g. Camry)'
+                value={newVehicleModel}
+                onChange={(event) => setNewVehicleModel(event.target.value)}
+                disabled={savingItemId === 'new'}
+              />
+              <input
+                type='number'
+                min='1990'
+                max='2100'
+                placeholder='Year'
+                value={newVehicleYear}
+                onChange={(event) => setNewVehicleYear(event.target.value)}
+                disabled={savingItemId === 'new'}
+              />
+              <div className='admin-modal-field'>
+                <label>Description</label>
+                <textarea
+                  placeholder='Short vehicle description'
+                  value={newVehicleDescription}
+                  onChange={(event) => setNewVehicleDescription(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <select value={newVehicleCondition} onChange={(event) => setNewVehicleCondition(event.target.value)} disabled={savingItemId === 'new'}>
+                {VEHICLE_CONDITIONS.map((condition) => (
+                  <option key={condition} value={condition}>
+                    {condition}
+                  </option>
+                ))}
+              </select>
+              <select value={newVehicleTransmission} onChange={(event) => setNewVehicleTransmission(event.target.value)} disabled={savingItemId === 'new'}>
+                {VEHICLE_TRANSMISSIONS.map((transmission) => (
+                  <option key={transmission} value={transmission}>
+                    {transmission}
+                  </option>
+                ))}
+              </select>
+              <select value={newVehicleFuelType} onChange={(event) => setNewVehicleFuelType(event.target.value)} disabled={savingItemId === 'new'}>
+                {VEHICLE_FUEL_TYPES.map((fuel) => (
+                  <option key={fuel} value={fuel}>
+                    {fuel}
+                  </option>
+                ))}
+              </select>
+              <div className='admin-modal-field'>
+                <label>Unit Price (NGN)</label>
+                <input
+                  type='number'
+                  min='0'
+                  placeholder='Unit Price (NGN)'
+                  value={newItemUnitPrice}
+                  onChange={(event) => setNewItemUnitPrice(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+            </div>
+            <div className='admin-modal-actions'>
+              <button
+                className='admin-refresh-btn'
+                type='button'
+                onClick={addStockItem}
+                disabled={savingItemId === 'new'}
+              >
+                {savingItemId === 'new' ? 'Adding...' : activeStockMeta?.addLabel || 'Add Item'}
+              </button>
+              <button
+                className='admin-refresh-btn'
+                type='button'
+                onClick={() => setShowVehicleForm(false)}
+                disabled={savingItemId === 'new'}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCarPartForm && activePanel === 'car-parts' && (
+        <div className='admin-modal-overlay' onClick={() => (savingItemId === 'new' ? null : setShowCarPartForm(false))}>
+          <div className='admin-modal-card' onClick={(event) => event.stopPropagation()}>
+            <div className='admin-modal-head'>
+              <h3>Add Car Part</h3>
+              <button
+                type='button'
+                className='admin-modal-close'
+                onClick={() => setShowCarPartForm(false)}
+                disabled={savingItemId === 'new'}
+                aria-label='Close car part form'
+              >
+                <i className='fas fa-times' />
+              </button>
+            </div>
+            <p>Enter car part details and stock information.</p>
+            <div className='admin-basic-modal-form'>
+              <div className='admin-modal-field'>
+                <label>Part Name</label>
+                <input
+                  type='text'
+                  placeholder='Car part name'
+                  value={newItemName}
+                  onChange={(event) => setNewItemName(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Description</label>
+                <textarea
+                  placeholder='Part description'
+                  value={newItemDescription}
+                  onChange={(event) => setNewItemDescription(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Unit Price (NGN)</label>
+                <input
+                  type='number'
+                  min='0'
+                  placeholder='Unit Price (NGN)'
+                  value={newItemUnitPrice}
+                  onChange={(event) => setNewItemUnitPrice(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+            </div>
+            <div className='admin-modal-actions'>
+              <button className='admin-refresh-btn' type='button' onClick={addStockItem} disabled={savingItemId === 'new'}>
+                {savingItemId === 'new' ? 'Adding...' : 'Add Car Part'}
+              </button>
+              <button className='admin-refresh-btn' type='button' onClick={() => setShowCarPartForm(false)} disabled={savingItemId === 'new'}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAccessoriesForm && activePanel === 'accessories' && (
+        <div className='admin-modal-overlay' onClick={() => (savingItemId === 'new' ? null : setShowAccessoriesForm(false))}>
+          <div className='admin-modal-card' onClick={(event) => event.stopPropagation()}>
+            <div className='admin-modal-head'>
+              <h3>Add Accessories</h3>
+              <button
+                type='button'
+                className='admin-modal-close'
+                onClick={() => setShowAccessoriesForm(false)}
+                disabled={savingItemId === 'new'}
+                aria-label='Close accessories form'
+              >
+                <i className='fas fa-times' />
+              </button>
+            </div>
+            <p>Enter accessories details and stock information.</p>
+            <div className='admin-basic-modal-form'>
+              <div className='admin-modal-field'>
+                <label>Accessory Name</label>
+                <input
+                  type='text'
+                  placeholder='Accessory name'
+                  value={newItemName}
+                  onChange={(event) => setNewItemName(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Description</label>
+                <textarea
+                  placeholder='Accessory description'
+                  value={newItemDescription}
+                  onChange={(event) => setNewItemDescription(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Unit Price (NGN)</label>
+                <input
+                  type='number'
+                  min='0'
+                  placeholder='Unit Price (NGN)'
+                  value={newItemUnitPrice}
+                  onChange={(event) => setNewItemUnitPrice(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+            </div>
+            <div className='admin-modal-actions'>
+              <button className='admin-refresh-btn' type='button' onClick={addStockItem} disabled={savingItemId === 'new'}>
+                {savingItemId === 'new' ? 'Adding...' : 'Add Accessories'}
+              </button>
+              <button className='admin-refresh-btn' type='button' onClick={() => setShowAccessoriesForm(false)} disabled={savingItemId === 'new'}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
