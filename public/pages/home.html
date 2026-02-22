@@ -64,9 +64,20 @@
       font-size: 1.3rem;
       font-weight: 800;
       color: var(--blue);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .brand span { color: var(--red); }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+    }
 
     .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -196,6 +207,48 @@
     .card h3 { margin: 0 0 7px; color: var(--blue); font-size: 1.04rem; }
     .card p { margin: 0; color: var(--muted); font-size: 0.93rem; }
 
+    .store-highlight-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .store-highlight-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(19, 49, 95, 0.08);
+    }
+
+    .store-highlight-tag {
+      display: inline-block;
+      background: #edf3ff;
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .store-highlight-card h3 {
+      margin: 0 0 8px;
+      color: var(--blue);
+      font-size: 1.03rem;
+      font-family: Montserrat, sans-serif;
+    }
+
+    .store-highlight-card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.48;
+      min-height: 42px;
+    }
+
     .feature-boxes {
       margin-top: 20px;
       display: grid;
@@ -214,6 +267,45 @@
     .feature-box i { font-size: 1.8rem; color: var(--red); }
     .feature-box h3 { margin: 10px 0 6px; color: var(--blue); font-size: 1.05rem; }
     .feature-box p { margin: 0; color: var(--muted); }
+
+    .tips-grid {
+      margin-top: 20px;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tip-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(20, 48, 95, 0.08);
+    }
+
+    .tip-tag {
+      display: inline-block;
+      border-radius: 999px;
+      background: #edf3ff;
+      color: var(--blue);
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .tip-card h3 {
+      margin: 0 0 8px;
+      color: var(--blue);
+      font-size: 1.02rem;
+    }
+
+    .tip-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.48;
+      font-size: 0.92rem;
+    }
 
     .testimonials {
       margin-top: 20px;
@@ -375,7 +467,9 @@
       .hero-grid { grid-template-columns: 1fr; }
       .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .store-highlight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .feature-boxes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tips-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .testimonials { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .split { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -390,7 +484,9 @@
       .hero-media img { min-height: 240px; }
       .quick-grid,
       .cards,
+      .store-highlight-grid,
       .feature-boxes,
+      .tips-grid,
       .testimonials,
       .footer-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
@@ -409,9 +505,10 @@
 
   <nav class="navbar">
     <div class="container nav-inner">
-      <a class="brand" href="/">Biltronix <span>Automotive</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="/logo.jpg" alt="Biltronix logo" /> Biltronix <span>Automotive</span></a>
       <div class="nav-links">
         <a href="#services">Services</a>
+        <a href="#tips">Car Tips</a>
         <a href="#testimonials">Testimonials</a>
         <a href="#contact">Contact</a>
         <a href="/sales" class="cta">Our Store</a>
@@ -434,21 +531,25 @@
           </div>
         </div>
         <div class="hero-media">
-          <div id="heroCarsCarousel" class="carousel slide hero-car-carousel" data-bs-ride="carousel" data-bs-interval="2500">
+          <div id="heroCarsCarousel" class="carousel slide hero-car-carousel" data-auto-carousel data-interval="3000">
             <div class="carousel-indicators">
               <button type="button" data-bs-target="#heroCarsCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
               <button type="button" data-bs-target="#heroCarsCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
               <button type="button" data-bs-target="#heroCarsCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+              <button type="button" data-bs-target="#heroCarsCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
             </div>
             <div class="carousel-inner">
               <div class="carousel-item active">
-                <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/Land-Cruiser.jpg" alt="Toyota Land Cruiser" />
+                <img src="https://images.unsplash.com/photo-1617531653332-bd46c24f2068?auto=format&fit=crop&w=1400&q=80" alt="Cute mint compact car" />
               </div>
               <div class="carousel-item">
-                <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/Lexus-2020.jpg" alt="Lexus SUV" />
+                <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80" alt="Cute red city car" />
               </div>
               <div class="carousel-item">
-                <img src="https://www.pivotmotors.com/wp-content/uploads/2019/05/highlander-2020.jpg" alt="Toyota Highlander" />
+                <img src="https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1400&q=80" alt="Cute yellow vintage car" />
+              </div>
+              <div class="carousel-item">
+                <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1400&q=80" alt="Cute blue hatchback car" />
               </div>
             </div>
           </div>
@@ -478,6 +579,33 @@
     </div>
   </section>
 
+  <section class="section" id="store-preview">
+    <div class="container">
+      <h2>From Our Store</h2>
+      <p class="sub">Quick store highlights managed by admins from Sanity Studio.</p>
+      <div class="store-highlight-grid" data-store-highlights-list>
+        <article class="store-highlight-card">
+          <span class="store-highlight-tag">Vehicles</span>
+          <h3>Vehicles</h3>
+          <p>Inspected sedans, SUVs, and premium options ready for immediate delivery.</p>
+          <a class="btn secondary" href="/sales#products">Browse Vehicles</a>
+        </article>
+        <article class="store-highlight-card">
+          <span class="store-highlight-tag">Car Parts</span>
+          <h3>Car Parts</h3>
+          <p>OEM-grade parts including brake kits, filters, batteries, and service components.</p>
+          <a class="btn secondary" href="/sales#products">Browse Parts</a>
+        </article>
+        <article class="store-highlight-card">
+          <span class="store-highlight-tag">Accessories</span>
+          <h3>Accessories</h3>
+          <p>Dash cams, seat covers, phone mounts, and practical interior upgrades.</p>
+          <a class="btn secondary" href="/sales#products">Browse Accessories</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="why">
     <div class="container">
       <h2>Why Choose Biltronix Automotive</h2>
@@ -485,7 +613,31 @@
       <div class="feature-boxes">
         <article class="feature-box"><i class="fas fa-user-cog"></i><h3>Certified Technicians</h3><p>Experienced professionals for diagnostics, repairs, and complex jobs.</p></article>
         <article class="feature-box"><i class="fas fa-microchip"></i><h3>Advanced Equipment</h3><p>Modern scanners and tools for accurate results and faster turnaround.</p></article>
-        <article class="feature-box"><i class="fas fa-shield-check"></i><h3>Quality Assurance</h3><p>Transparent work process with dependable workmanship and service quality.</p></article>
+        <article class="feature-box"><i class="fas fa-shield-alt"></i><h3>Quality Assurance</h3><p>Transparent work process with dependable workmanship and service quality.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="tips">
+    <div class="container">
+      <h2>Car Tips & Advice</h2>
+      <p class="sub">Practical tips your admins can update anytime from Sanity Studio.</p>
+      <div class="tips-grid" data-car-tips-list>
+        <article class="tip-card">
+          <span class="tip-tag">Maintenance</span>
+          <h3>Check Tire Pressure Weekly</h3>
+          <p>Keep your tires at recommended PSI to improve fuel economy and reduce uneven wear.</p>
+        </article>
+        <article class="tip-card">
+          <span class="tip-tag">Safety</span>
+          <h3>Listen For Early Brake Noise</h3>
+          <p>If you hear squealing while braking, inspect pads early to avoid expensive rotor damage.</p>
+        </article>
+        <article class="tip-card">
+          <span class="tip-tag">Engine Care</span>
+          <h3>Use OEM-Grade Oil Filters</h3>
+          <p>A quality filter improves engine protection during daily traffic and longer drives.</p>
+        </article>
       </div>
     </div>
   </section>
@@ -509,12 +661,12 @@
       <div class="panel">
         <form id="bookingForm">
           <div class="form-row">
-            <input class="input" type="text" placeholder="Full Name" required />
-            <input class="input" type="tel" placeholder="Phone Number" required />
+            <input class="input" type="text" name="fullName" placeholder="Full Name" required />
+            <input class="input" type="tel" name="whatsappNumber" placeholder="WhatsApp Number" required />
           </div>
           <div class="form-row" style="margin-top: 10px;">
-            <input class="input" type="text" placeholder="Vehicle Make & Model" required />
-            <select class="select" required>
+            <input class="input" type="text" name="vehicle" placeholder="Vehicle Make & Model" required />
+            <select class="select" name="service" required>
               <option value="">Select Service</option>
               <option>Computerized Diagnostics</option>
               <option>Repair & Troubleshooting</option>
@@ -525,10 +677,10 @@
             </select>
           </div>
           <div class="form-row" style="margin-top: 10px;">
-            <input class="input" type="date" required />
-            <input class="input" type="email" placeholder="Email Address" />
+            <input class="input" type="date" name="appointmentDate" required />
+            <input class="input" type="email" name="email" placeholder="Email Address" />
           </div>
-          <textarea class="textarea" placeholder="Additional details" style="margin-top: 10px;"></textarea>
+          <textarea class="textarea" name="note" placeholder="Additional details" style="margin-top: 10px;"></textarea>
           <button class="btn primary" type="submit" style="margin-top: 10px; border: 0; cursor: pointer;">Submit Booking</button>
         </form>
       </div>
@@ -553,7 +705,7 @@
           <h3>Send a Message</h3>
           <form id="contactForm">
             <input class="input" type="text" placeholder="Full Name" required />
-            <input class="input" type="tel" placeholder="Phone Number" required style="margin-top: 10px;" />
+            <input class="input" type="tel" placeholder="WhatsApp Number" required style="margin-top: 10px;" />
             <input class="input" type="email" placeholder="Email" style="margin-top: 10px;" />
             <textarea class="textarea" placeholder="How can we help?" style="margin-top: 10px;"></textarea>
             <button class="btn primary" type="submit" style="margin-top: 10px; border: 0; cursor: pointer;">Send Message</button>
@@ -643,3 +795,5 @@
   </footer>
 </body>
 </html>
+
+

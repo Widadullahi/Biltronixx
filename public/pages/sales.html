@@ -9,10 +9,12 @@
 
     :root {
       --blue: #13315f;
+      --blue-2: #0f2444;
       --red: #ef233c;
       --ink: #1b263b;
       --soft: #f6f9ff;
       --line: #dfe7f3;
+      --muted: #51627f;
     }
 
     * { box-sizing: border-box; }
@@ -25,6 +27,20 @@
     }
 
     .container { width: min(1140px, 92%); margin: 0 auto; }
+
+    .topbar {
+      background: var(--blue-2);
+      color: #dbe8ff;
+      padding: 8px 0;
+      font-size: 0.9rem;
+    }
+
+    .topbar .container {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
     .navbar {
       position: sticky;
@@ -48,9 +64,20 @@
       font-size: 1.3rem;
       text-decoration: none;
       color: var(--blue);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .brand span { color: var(--red); }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+    }
 
     .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -62,7 +89,7 @@
       border-radius: 999px;
     }
 
-    .nav-links a.hot { background: var(--red); color: #fff; }
+    .nav-links a.cta { background: var(--red); color: #fff; }
 
     .hero {
       padding: 26px 0;
@@ -229,6 +256,7 @@
     }
 
     @media (max-width: 620px) {
+      .topbar { font-size: 0.82rem; }
       .nav-inner { padding: 8px 0; }
       .brand { font-size: 1.05rem; }
       .nav-links a { font-size: 0.88rem; padding: 7px 10px; }
@@ -239,13 +267,23 @@
   </style>
 </head>
 <body>
+  <div class="topbar">
+    <div class="container">
+      <div>Mon - Sat: 09:00 AM - 07:00 PM</div>
+      <div>Call: +234 706 088 2711</div>
+    </div>
+  </div>
+
   <nav class="navbar">
     <div class="container nav-inner">
-      <a class="brand" href="/">Biltronix <span>Store</span></a>
+      <a class="brand" href="/"><img class="brand-logo" src="/logo.jpg" alt="Biltronix logo" /> Biltronix <span>Automotive</span></a>
       <div class="nav-links">
         <a href="/">Home</a>
-        <a href="/">Services</a>
-        <a class="hot" href="https://wa.me/2347060882711?text=Hello%20Biltronix%20Store!" target="_blank">WhatsApp</a>
+        <a href="/#services">Services</a>
+        <a href="/#tips">Car Tips</a>
+        <a href="/#testimonials">Testimonials</a>
+        <a href="/#contact">Contact</a>
+        <a href="/sales" class="cta">Our Store</a>
       </div>
     </div>
   </nav>

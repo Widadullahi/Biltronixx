@@ -1,4 +1,47 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createBookingRequest, fetchCarTips, fetchStoreHighlights } from '../lib/sanityClient.js';
+
+const FALLBACK_CAR_TIPS = [
+  {
+    title: 'Check Tire Pressure Weekly',
+    body: 'Keep your tires at the recommended PSI to improve fuel economy and reduce uneven wear.',
+    category: 'Maintenance',
+  },
+  {
+    title: 'Listen For Early Brake Noise',
+    body: 'If you hear squealing when braking, inspect pads early to avoid damaging rotors and spending more.',
+    category: 'Safety',
+  },
+  {
+    title: 'Use OEM-Grade Oil Filters',
+    body: 'A quality filter protects your engine better during long drives and stop-and-go traffic.',
+    category: 'Engine Care',
+  },
+];
+
+const FALLBACK_STORE_HIGHLIGHTS = [
+  {
+    title: 'Vehicles',
+    summary: 'Inspected sedans, SUVs, and premium options ready for immediate delivery.',
+    category: 'Vehicles',
+    ctaLabel: 'Browse Vehicles',
+    ctaHref: '/sales#products',
+  },
+  {
+    title: 'Car Parts',
+    summary: 'OEM-grade parts including brake kits, filters, batteries, and service components.',
+    category: 'Car Parts',
+    ctaLabel: 'Browse Parts',
+    ctaHref: '/sales#products',
+  },
+  {
+    title: 'Accessories',
+    summary: 'Dash cams, seat covers, phone mounts, and practical interior upgrades.',
+    category: 'Accessories',
+    ctaLabel: 'Browse Accessories',
+    ctaHref: '/sales#products',
+  },
+];
 
 function extractPageParts(html) {
   const parser = new DOMParser();
@@ -18,6 +61,7 @@ function extractPageParts(html) {
 export default function StaticHtmlPage({ htmlPath, pageType }) {
   const containerRef = useRef(null);
   const [parts, setParts] = useState({ bodyHtml: '', styleText: '', title: 'Biltronix' });
+  const [popup, setPopup] = useState({ open: false, title: '', message: '' });
 
   const styleTagId = useMemo(() => `page-style-${pageType}`, [pageType]);
 
@@ -65,7 +109,26 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
 
   useEffect(() => {
     const root = containerRef.current;
+    if (!root) return;
+
+    const hash = window.location.hash;
+    if (!hash || hash === '#') return;
+
+    const section = root.querySelector(hash);
+    if (!(section instanceof HTMLElement)) return;
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: section.offsetTop - 100,
+        behavior: 'smooth',
+      });
+    });
+  }, [parts.bodyHtml]);
+
+  useEffect(() => {
+    const root = containerRef.current;
     if (!root) return undefined;
+    const cleanupTasks = [];
 
     const applyStoreFilters = () => {
       const activeFilter = root.dataset.activeFilter || 'all';
@@ -98,8 +161,37 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       if (!(form instanceof HTMLFormElement)) return;
       if (form.id === 'bookingForm') {
         event.preventDefault();
-        alert('Thank you for your booking request! We will contact you shortly to confirm your appointment.');
-        form.reset();
+        const formData = new FormData(form);
+        const bookingPayload = {
+          customer: String(formData.get('fullName') || '').trim(),
+          whatsappNumber: String(formData.get('whatsappNumber') || '').trim(),
+          vehicle: String(formData.get('vehicle') || '').trim(),
+          service: String(formData.get('service') || '').trim(),
+          date: String(formData.get('appointmentDate') || '').trim(),
+          email: String(formData.get('email') || '').trim(),
+          note: String(formData.get('note') || '').trim(),
+        };
+
+        createBookingRequest(bookingPayload)
+          .then(() => {
+            setPopup({
+              open: true,
+              title: 'Booking Request Received',
+              message:
+                'Thank you for your booking request. We will get in touch via WhatsApp once an admin confirms your appointment.',
+            });
+            form.reset();
+          })
+          .catch((submitError) => {
+            setPopup({
+              open: true,
+              title: 'Booking Not Submitted',
+              message:
+                submitError instanceof Error
+                  ? submitError.message
+                  : 'Could not submit booking now. Please try again in a moment.',
+            });
+          });
       }
       if (form.id === 'contactForm') {
         event.preventDefault();
@@ -202,6 +294,106 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
     root.addEventListener('click', onClick);
     root.addEventListener('input', onInput);
 
+    const escapeHtml = (value) =>
+      String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+
+    const storeHighlightsList = root.querySelector('[data-store-highlights-list]');
+    if (storeHighlightsList instanceof HTMLElement) {
+      const renderStoreHighlights = (items) => {
+        const safeItems = Array.isArray(items) && items.length > 0 ? items : FALLBACK_STORE_HIGHLIGHTS;
+        const markup = safeItems
+          .map(
+            (item) => `
+              <article class="store-highlight-card">
+                <span class="store-highlight-tag">${escapeHtml(item.category || 'General')}</span>
+                <h3>${escapeHtml(item.title || 'Untitled')}</h3>
+                <p>${escapeHtml(item.summary || '')}</p>
+                <a class="btn secondary" href="${escapeHtml(item.ctaHref || '/sales')}">${escapeHtml(item.ctaLabel || 'Browse Store')}</a>
+              </article>
+            `
+          )
+          .join('');
+        storeHighlightsList.innerHTML = markup;
+      };
+
+      fetchStoreHighlights(6)
+        .then((items) => renderStoreHighlights(items))
+        .catch(() => renderStoreHighlights(FALLBACK_STORE_HIGHLIGHTS));
+    }
+
+    const tipsList = root.querySelector('[data-car-tips-list]');
+    if (tipsList instanceof HTMLElement) {
+      const renderTips = (tips) => {
+        const safeTips = Array.isArray(tips) && tips.length > 0 ? tips : FALLBACK_CAR_TIPS;
+        const tipMarkup = safeTips
+          .map(
+            (tip) => `
+              <article class="tip-card">
+                <span class="tip-tag">${escapeHtml(tip.category || 'General')}</span>
+                <h3>${escapeHtml(tip.title || 'Untitled Tip')}</h3>
+                <p>${escapeHtml(tip.body || '')}</p>
+              </article>
+            `
+          )
+          .join('');
+        tipsList.innerHTML = tipMarkup;
+      };
+
+      fetchCarTips(6)
+        .then((tips) => renderTips(tips))
+        .catch(() => renderTips(FALLBACK_CAR_TIPS));
+    }
+
+    root.querySelectorAll('[data-auto-carousel]').forEach((carouselNode) => {
+      if (!(carouselNode instanceof HTMLElement)) return;
+
+      const items = Array.from(carouselNode.querySelectorAll('.carousel-item'));
+      if (items.length <= 1) return;
+
+      const indicators = Array.from(carouselNode.querySelectorAll('.carousel-indicators button'));
+      const intervalMs = Number.parseInt(carouselNode.getAttribute('data-interval') || '3000', 10);
+      let activeIndex = Math.max(0, items.findIndex((item) => item.classList.contains('active')));
+
+      const activateIndex = (nextIndex) => {
+        items.forEach((item, index) => {
+          item.classList.toggle('active', index === nextIndex);
+        });
+
+        indicators.forEach((button, index) => {
+          const isActive = index === nextIndex;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-current', isActive ? 'true' : 'false');
+        });
+      };
+
+      activateIndex(activeIndex);
+
+      const onIndicatorClick = (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const button = target.closest('.carousel-indicators button');
+        if (!(button instanceof HTMLButtonElement)) return;
+        const slideTo = Number.parseInt(button.getAttribute('data-bs-slide-to') || '', 10);
+        if (!Number.isInteger(slideTo) || slideTo < 0 || slideTo >= items.length) return;
+        activeIndex = slideTo;
+        activateIndex(activeIndex);
+      };
+      carouselNode.addEventListener('click', onIndicatorClick);
+
+      const timerId = window.setInterval(() => {
+        activeIndex = (activeIndex + 1) % items.length;
+        activateIndex(activeIndex);
+      }, Number.isFinite(intervalMs) && intervalMs > 0 ? intervalMs : 3000);
+
+      cleanupTasks.push(() => carouselNode.removeEventListener('click', onIndicatorClick));
+      cleanupTasks.push(() => window.clearInterval(timerId));
+    });
+
     if (root.querySelector('[data-product-card]')) {
       setActiveFilter('all');
     }
@@ -210,8 +402,24 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       root.removeEventListener('submit', onSubmit);
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
+      cleanupTasks.forEach((fn) => fn());
     };
   }, [parts.bodyHtml]);
 
-  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: parts.bodyHtml }} />;
+  return (
+    <>
+      <div ref={containerRef} dangerouslySetInnerHTML={{ __html: parts.bodyHtml }} />
+      {popup.open && (
+        <div className='site-popup-overlay' role='dialog' aria-modal='true' aria-labelledby='site-popup-title'>
+          <div className='site-popup-card'>
+            <h3 id='site-popup-title'>{popup.title}</h3>
+            <p>{popup.message}</p>
+            <button type='button' onClick={() => setPopup({ open: false, title: '', message: '' })}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

@@ -23,3 +23,44 @@ body,
   background: #1f4d85;
   color: #fff;
 }
+
+.site-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(8, 20, 41, 0.48);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.site-popup-card {
+  width: min(460px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 24px 42px rgba(10, 28, 54, 0.24);
+  padding: 20px;
+}
+
+.site-popup-card h3 {
+  margin: 0;
+  color: #14305f;
+  font-size: 1.1rem;
+}
+
+.site-popup-card p {
+  margin: 10px 0 0;
+  color: #476089;
+  line-height: 1.5;
+}
+
+.site-popup-card button {
+  margin-top: 14px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #ef233c;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
