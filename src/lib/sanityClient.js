@@ -282,3 +282,96 @@ export async function createBookingRequest(payload) {
 
   return normalizeBooking(created);
 }
+
+function normalizeInspectorAccount(item) {
+  return {
+    _id: item._id,
+    fullName: item.fullName || '',
+    email: item.email || '',
+    phone: item.phone || '',
+    companyName: item.companyName || '',
+    companyAddress: item.companyAddress || '',
+    signatureDataUrl: item.signatureDataUrl || '',
+  };
+}
+
+function normalizeInspectionReport(item) {
+  return {
+    _id: item._id,
+    accountId: item.accountId || '',
+    companyName: item.companyName || '',
+    inspectorName: item.inspectorName || '',
+    vehicleLabel: item.vehicleLabel || '',
+    vehicleRegNo: item.vehicleRegNo || '',
+    inspectedAt: item.inspectedAt || '',
+    checklist: Array.isArray(item.checklist) ? item.checklist : [],
+    images: Array.isArray(item.images) ? item.images : [],
+    overallVerdict: item.overallVerdict || 'Pending',
+    recommendation: item.recommendation || '',
+  };
+}
+
+export async function createInspectorAccount(payload) {
+  if (!sanityWriteClient) {
+    throw new Error('Missing write token for account creation.');
+  }
+
+  const created = await sanityWriteClient.create({
+    _type: 'inspectorAccount',
+    fullName: payload.fullName,
+    email: payload.email,
+    phone: payload.phone,
+    companyName: payload.companyName,
+    companyAddress: payload.companyAddress,
+    signatureDataUrl: payload.signatureDataUrl || '',
+  });
+
+  return normalizeInspectorAccount(created);
+}
+
+export async function createInspectionReport(payload) {
+  if (!sanityWriteClient) {
+    throw new Error('Missing write token for inspection report save.');
+  }
+
+  const created = await sanityWriteClient.create({
+    _type: 'inspectionReport',
+    accountId: payload.accountId,
+    companyName: payload.companyName,
+    inspectorName: payload.inspectorName,
+    vehicleLabel: payload.vehicleLabel,
+    vehicleRegNo: payload.vehicleRegNo || '',
+    inspectedAt: payload.inspectedAt,
+    checklist: payload.checklist || [],
+    images: payload.images || [],
+    overallVerdict: payload.overallVerdict || 'Pending',
+    recommendation: payload.recommendation || '',
+  });
+
+  return normalizeInspectionReport(created);
+}
+
+export async function fetchInspectionReportsByAccount(accountId) {
+  if (!sanityClient) {
+    throw new Error('Missing Sanity config.');
+  }
+
+  const docs = await sanityClient.fetch(
+    `*[_type == "inspectionReport" && accountId == $accountId] | order(inspectedAt desc){
+      _id,
+      accountId,
+      companyName,
+      inspectorName,
+      vehicleLabel,
+      vehicleRegNo,
+      inspectedAt,
+      checklist,
+      images,
+      overallVerdict,
+      recommendation
+    }`,
+    { accountId }
+  );
+
+  return docs.map(normalizeInspectionReport);
+}
