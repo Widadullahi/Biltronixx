@@ -83,10 +83,32 @@
 
     .nav-links a {
       text-decoration: none;
-      color: var(--blue);
-      font-weight: 600;
+      color: #0f2747;
+      font-weight: 700;
       padding: 9px 12px;
       border-radius: 999px;
+      border: 1px solid #d5e1f2;
+      background: #f8fbff;
+      box-shadow: 0 6px 14px rgba(15, 39, 71, 0.08);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .nav-links a:hover {
+      transform: translateY(-1px);
+      background: #eef5ff;
+      box-shadow: 0 10px 18px rgba(15, 39, 71, 0.13);
+    }
+
+    .nav-links a.install {
+      color: #fff;
+      background: linear-gradient(135deg, #0b8f6f, #0ba77f);
+      border-color: rgba(9, 122, 97, 0.7);
+      box-shadow: 0 10px 20px rgba(11, 159, 121, 0.32);
+    }
+
+    .nav-links a.install:hover {
+      background: linear-gradient(135deg, #0a8265, #0a9974);
+      box-shadow: 0 14px 24px rgba(11, 159, 121, 0.4);
     }
 
     .nav-links a.cta { background: var(--red); color: #fff; }
@@ -176,6 +198,38 @@
     .quick-card h4 { margin: 8px 0 6px; font-size: 1rem; color: var(--blue); font-family: Montserrat, sans-serif; }
     .quick-card p { margin: 0; font-size: 0.9rem; color: var(--muted); }
 
+    .inspection-promo {
+      margin-top: 18px;
+      border: 1px solid #d8e6fb;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #f0f6ff, #fff4f6);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 12px 24px rgba(20, 48, 95, 0.1);
+    }
+
+    .inspection-promo h3 {
+      margin: 0 0 6px;
+      color: var(--blue);
+      font-family: Montserrat, sans-serif;
+      font-size: 1.1rem;
+    }
+
+    .inspection-promo p {
+      margin: 0;
+      color: #4b6286;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      max-width: 740px;
+    }
+
+    .inspection-promo .btn {
+      white-space: nowrap;
+    }
+
     .section { padding: 52px 0; }
     .section.alt { background: #f9fbff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 
@@ -215,17 +269,92 @@
     }
 
     .store-highlight-card {
+      --promo-1: #1f4d85;
+      --promo-2: #ef233c;
+      --promo-soft-1: #edf3ff;
+      --promo-soft-2: #fff2f5;
       border: 1px solid var(--line);
       border-radius: 16px;
-      background: #fff;
+      background: linear-gradient(135deg, var(--promo-soft-1), var(--promo-soft-2));
       padding: 16px;
       box-shadow: 0 10px 24px rgba(19, 49, 95, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .store-highlight-card::before {
+      content: "";
+      position: absolute;
+      top: -36px;
+      right: -36px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.65), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+
+    .store-highlight-card.cat-vehicle {
+      --promo-1: #0f4c81;
+      --promo-2: #2490d0;
+      --promo-soft-1: #ecf6ff;
+      --promo-soft-2: #eefaff;
+    }
+
+    .store-highlight-card.cat-parts {
+      --promo-1: #6e1f67;
+      --promo-2: #e04f95;
+      --promo-soft-1: #fff0fa;
+      --promo-soft-2: #fff5fb;
+    }
+
+    .store-highlight-card.cat-accessories {
+      --promo-1: #8a3d00;
+      --promo-2: #ff8b2c;
+      --promo-soft-1: #fff6ec;
+      --promo-soft-2: #fffaf4;
+    }
+
+    .store-highlight-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .store-highlight-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.6);
+      background: linear-gradient(135deg, var(--promo-1), var(--promo-2));
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 8px 16px color-mix(in srgb, var(--promo-1) 35%, transparent);
+    }
+
+    .store-highlight-ad {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--promo-1), var(--promo-2));
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.45);
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .store-highlight-tag {
       display: inline-block;
-      background: #edf3ff;
-      color: var(--blue);
+      background: rgba(255, 255, 255, 0.7);
+      color: #163764;
       border-radius: 999px;
       padding: 5px 10px;
       font-size: 0.74rem;
@@ -487,10 +616,26 @@
     @media (max-width: 620px) {
       .topbar { font-size: 0.82rem; }
       .brand { font-size: 1.06rem; }
-      .nav-links { gap: 4px; }
-      .nav-links a { font-size: 0.86rem; padding: 7px 10px; }
+      .nav-inner {
+        min-height: auto;
+        padding: 10px 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .brand { justify-content: center; }
+      .nav-links {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .nav-links a { font-size: 0.88rem; padding: 10px 8px; text-align: center; }
+      .nav-links a.install,
+      .nav-links a.cta { grid-column: span 2; }
       .hero { padding-top: 22px; }
       .hero-media img { min-height: 240px; }
+      .inspection-promo { grid-template-columns: 1fr; }
       .quick-grid,
       .cards,
       .store-highlight-grid,
@@ -517,8 +662,9 @@
       <a class="brand" href="/"><img class="brand-logo" src="/logo.jpg" alt="Biltronix logo" /> Biltronix <span>Automotive</span></a>
       <div class="nav-links">
         <a href="#services">Services</a>
-        <a href="/car-tips">Car Tips</a>        <a href="/inspection-app">Generate Inspection Report</a>
-        <a href="#" data-install-app>Install App</a>
+        <a href="/car-tips">Car Tips</a>
+        <a href="/inspection-app">Generate Inspection Report</a>
+        <a href="#" data-install-app class="install"><i class="fas fa-download"></i> Install App</a>
         <a href="/sales" class="cta">Our Store</a>
       </div>
     </div>
@@ -554,10 +700,10 @@
                 <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80" alt="Cute red city car" />
               </div>
               <div class="carousel-item">
-                <img src="https://images.unsplash.com/photo-1494905998402-395d579af36f?auto=format&fit=crop&w=1400&q=80" alt="Cute yellow vintage car" />
+                <img src="https://www.usnews.com/object/image/00000193-ad21-d11e-af9b-ad33dc5b0000/2025-lx-600-f-sport-15.jpeg?update-time=1733776496759&amp;size=responsive640" alt="Lexus SUV" />
               </div>
               <div class="carousel-item">
-                <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1400&q=80" alt="Cute blue hatchback car" />
+                <img src="https://www.usnews.com/object/image/0000019a-9d4b-d124-a1ff-9f4fc4b60000/img-1359.jpg?update-time=1763575578873&amp;size=responsive640&amp;format=webp" alt="Toyota sedan" />
               </div>
             </div>
           </div>
@@ -572,17 +718,29 @@
     </div>
   </header>
 
+  <section class="section">
+    <div class="container">
+      <div class="inspection-promo">
+        <div>
+          <h3>Generate Pre-Purchase Inspection Report</h3>
+          <p>Create professional inspection reports with photos, findings, and final recommendation, then download polished PDF copies branded with your company details.</p>
+        </div>
+        <a class="btn primary" href="/inspection-app"><i class="fas fa-file-signature"></i> Open Inspection App</a>
+      </div>
+    </div>
+  </section>
+
   <section class="section alt" id="services">
     <div class="container">
       <h2>Our Services</h2>
       <p class="sub">Professional workshop support that is easy to notice and easy to book.</p>
       <div class="cards">
         <article class="card"><img src="/computerized Diagnostics.jpg" alt="Computerized diagnostics" /><div class="body"><h3>Computerized Diagnostics</h3><p>Fast fault scan and deep troubleshooting with modern tools.</p></div></article>
-        <article class="card"><img src="https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=1000&q=80" alt="Repair service" /><div class="body"><h3>Repair & Troubleshooting</h3><p>Engine, transmission and electrical fault tracing and repair.</p></div></article>
+        <article class="card"><img src="/repair-troubleshooting.jpeg" alt="Repair service" /><div class="body"><h3>Repair & Troubleshooting</h3><p>Engine, transmission and electrical fault tracing and repair.</p></div></article>
         <article class="card"><img src="/prepurchase-inspection.jpg" alt="Pre purchase inspection" /><div class="body"><h3>Pre-Purchase Inspection</h3><p>Thorough inspection before payment to avoid hidden issues.</p></div></article>
-        <article class="card"><img src="https://images.unsplash.com/photo-1615906655593-ad0386982a0f?auto=format&fit=crop&w=1000&q=80" alt="Engine and transmission repairs" /><div class="body"><h3>Engine & Transmission Repair</h3><p>Major and minor engine and gearbox repair with testing.</p></div></article>
-        <article class="card"><img src="https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=1000&q=80" alt="Hybrid and EV service" /><div class="body"><h3>Hybrid & EV Battery Service</h3><p>Battery diagnostics, module checks and restoration support.</p></div></article>
-        <article class="card"><img src="https://images.unsplash.com/photo-1625047509168-a7026f36de04?auto=format&fit=crop&w=1000&q=80" alt="Periodic maintenance" /><div class="body"><h3>Periodic Maintenance</h3><p>Oil, filters, fluids and safety checks to keep cars reliable.</p></div></article>
+        <article class="card"><img src="/ecu-trouble-shooting-repair.jpeg" alt="ECU troubleshooting and repair" /><div class="body"><h3>ECU Trouble shooting&Repair</h3><p>Advanced ECU diagnostics, troubleshooting, and repair with proper system testing.</p></div></article>
+        <article class="card"><img src="/hybrid-ev-battery-service.jpeg" alt="Hybrid and EV service" /><div class="body"><h3>Hybrid & EV Battery Service</h3><p>Battery diagnostics, module checks and restoration support.</p></div></article>
+        <article class="card"><img src="https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=1000&q=80" alt="Periodic maintenance" /><div class="body"><h3>Periodic Maintenance</h3><p>Oil, filters, fluids and safety checks to keep cars reliable.</p></div></article>
       </div>
     </div>
   </section>
@@ -592,19 +750,31 @@
       <h2>From Our Store</h2>
       <p class="sub">Quick store highlights managed by admins from Sanity Studio.</p>
       <div class="store-highlight-grid" data-store-highlights-list>
-        <article class="store-highlight-card">
+        <article class="store-highlight-card cat-vehicle">
+          <div class="store-highlight-top">
+            <div class="store-highlight-icon"><i class="fas fa-car-side"></i></div>
+            <span class="store-highlight-ad"><i class="fas fa-bullhorn"></i> Featured</span>
+          </div>
           <span class="store-highlight-tag">Vehicles</span>
           <h3>Vehicles</h3>
           <p>Inspected sedans, SUVs, and premium options ready for immediate delivery.</p>
           <a class="btn secondary" href="/sales#products">Browse Vehicles</a>
         </article>
-        <article class="store-highlight-card">
+        <article class="store-highlight-card cat-parts">
+          <div class="store-highlight-top">
+            <div class="store-highlight-icon"><i class="fas fa-cogs"></i></div>
+            <span class="store-highlight-ad"><i class="fas fa-bullhorn"></i> Featured</span>
+          </div>
           <span class="store-highlight-tag">Car Parts</span>
           <h3>Car Parts</h3>
           <p>OEM-grade parts including brake kits, filters, batteries, and service components.</p>
           <a class="btn secondary" href="/sales#products">Browse Parts</a>
         </article>
-        <article class="store-highlight-card">
+        <article class="store-highlight-card cat-accessories">
+          <div class="store-highlight-top">
+            <div class="store-highlight-icon"><i class="fas fa-toolbox"></i></div>
+            <span class="store-highlight-ad"><i class="fas fa-bullhorn"></i> Featured</span>
+          </div>
           <span class="store-highlight-tag">Accessories</span>
           <h3>Accessories</h3>
           <p>Dash cams, seat covers, phone mounts, and practical interior upgrades.</p>
@@ -679,7 +849,7 @@
               <option>Computerized Diagnostics</option>
               <option>Repair & Troubleshooting</option>
               <option>Pre-Purchase Inspection</option>
-              <option>Engine & Transmission Repair</option>
+              <option>ECU Trouble shooting&Repair</option>
               <option>Hybrid & EV Battery Service</option>
               <option>Periodic Maintenance</option>
             </select>
@@ -712,10 +882,10 @@
         <div class="panel">
           <h3>Send a Message</h3>
           <form id="contactForm">
-            <input class="input" type="text" placeholder="Full Name" required />
-            <input class="input" type="tel" placeholder="WhatsApp Number" required style="margin-top: 10px;" />
-            <input class="input" type="email" placeholder="Email" style="margin-top: 10px;" />
-            <textarea class="textarea" placeholder="How can we help?" style="margin-top: 10px;"></textarea>
+            <input class="input" type="text" name="fullName" placeholder="Full Name" required />
+            <input class="input" type="tel" name="whatsappNumber" placeholder="WhatsApp Number" required style="margin-top: 10px;" />
+            <input class="input" type="email" name="email" placeholder="Email" style="margin-top: 10px;" />
+            <textarea class="textarea" name="message" placeholder="How can we help?" style="margin-top: 10px;"></textarea>
             <button class="btn primary" type="submit" style="margin-top: 10px; border: 0; cursor: pointer;">Send Message</button>
           </form>
         </div>

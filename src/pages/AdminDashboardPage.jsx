@@ -501,39 +501,6 @@ export default function AdminDashboardPage() {
                 </article>
               ))}
             </section>
-            <section className='admin-grid overview-grid'>
-              <article className='admin-card'>
-                <h2>Today&apos;s Booking Queue</h2>
-                <ul className='admin-list'>
-                  {bookings.filter((booking) => booking.date === todayIso).map((booking) => (
-                    <li key={booking.id}>
-                      <span>{booking.customer}</span>
-                      <span className={`pill ${toSlug(booking.status)}`}>{booking.status}</span>
-                    </li>
-                  ))}
-                  {bookings.filter((booking) => booking.date === todayIso).length === 0 && (
-                    <li className='empty-row'>No bookings scheduled for today.</li>
-                  )}
-                </ul>
-              </article>
-              <article className='admin-card'>
-                <h2>Revenue by Channel</h2>
-                <ul className='admin-list'>
-                  {revenueByChannel.map((entry) => (
-                    <li key={entry.channel} className='channel-row'>
-                      <div className='channel-meta'>
-                        <span>{entry.channel}</span>
-                        <strong>{naira.format(entry.value)}</strong>
-                      </div>
-                      <div className='channel-track'>
-                        <span className='channel-fill' style={{ width: `${entry.percentage}%` }} />
-                      </div>
-                    </li>
-                  ))}
-                  {revenueByChannel.length === 0 && <li className='empty-row'>No order revenue data yet.</li>}
-                </ul>
-              </article>
-            </section>
           </>
         )}
 

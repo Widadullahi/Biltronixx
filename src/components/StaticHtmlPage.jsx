@@ -44,6 +44,7 @@ const FALLBACK_STORE_HIGHLIGHTS = [
 ];
 
 const WHATSAPP_NUMBER = '2347060882711';
+const INSTALL_BANNER_SESSION_KEY = 'biltronix_install_banner_dismissed';
 
 function extractPageParts(html) {
   const parser = new DOMParser();
@@ -71,6 +72,7 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
     message: '',
     canInstall: false,
   });
+  const [showInstallSidePrompt, setShowInstallSidePrompt] = useState(false);
   const [productModal, setProductModal] = useState({
     open: false,
     title: '',
@@ -82,6 +84,61 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
   });
 
   const styleTagId = useMemo(() => `page-style-${pageType}`, [pageType]);
+
+  const openInstallDialog = () => {
+    const deferredPrompt = installPromptRef.current;
+    const ua = navigator.userAgent || '';
+    const isIos = /iPhone|iPad|iPod/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (isStandalone) {
+      setInstallModal({
+        open: true,
+        title: 'Already Installed',
+        message: 'This app is already installed on your device.',
+        canInstall: false,
+      });
+      return;
+    }
+
+    if (deferredPrompt) {
+      setInstallModal({
+        open: true,
+        title: 'Install Biltronix App',
+        message: 'Tap Install Now to add Biltronix to your device.',
+        canInstall: true,
+      });
+      return;
+    }
+
+    if (isIos) {
+      setInstallModal({
+        open: true,
+        title: 'Install on iPhone/iPad',
+        message: 'Tap Share in Safari, then choose Add to Home Screen.',
+        canInstall: false,
+      });
+      return;
+    }
+
+    if (isAndroid) {
+      setInstallModal({
+        open: true,
+        title: 'Install on Android',
+        message: 'Open browser menu and tap Install app or Add to Home screen.',
+        canInstall: false,
+      });
+      return;
+    }
+
+    setInstallModal({
+      open: true,
+      title: 'Install App',
+      message: 'In your browser menu, choose Install App or Create Shortcut to install Biltronix.',
+      canInstall: false,
+    });
+  };
 
   const triggerInstallPrompt = async () => {
     const deferredPrompt = installPromptRef.current;
@@ -103,7 +160,7 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
         setPopup({
           open: true,
           title: 'Install Cancelled',
-          message: 'You can install later from the Install App button.',
+          message: 'You can install later from the side install prompt.',
         });
       }
     } finally {
@@ -180,6 +237,7 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
 
     const onAppInstalled = () => {
       installPromptRef.current = null;
+      setShowInstallSidePrompt(false);
       setPopup({
         open: true,
         title: 'App Installed',
@@ -195,6 +253,18 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       window.removeEventListener('appinstalled', onAppInstalled);
     };
   }, []);
+
+  useEffect(() => {
+    if (!parts.bodyHtml) return;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    let dismissedForVisit = false;
+    try {
+      dismissedForVisit = window.sessionStorage.getItem(INSTALL_BANNER_SESSION_KEY) === '1';
+    } catch {
+      dismissedForVisit = false;
+    }
+    setShowInstallSidePrompt(!isStandalone && !dismissedForVisit);
+  }, [parts.bodyHtml]);
 
   useEffect(() => {
     const root = containerRef.current;
@@ -269,7 +339,27 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       }
       if (form.id === 'contactForm') {
         event.preventDefault();
-        alert('Thank you for your inquiry! Our team will contact you shortly.');
+        const formData = new FormData(form);
+        const fullName = String(formData.get('fullName') || '').trim();
+        const whatsappNumber = String(formData.get('whatsappNumber') || '').trim();
+        const email = String(formData.get('email') || '').trim();
+        const messageText = String(formData.get('message') || '').trim();
+
+        const message = [
+          'Hello Biltronix, I have a general inquiry.',
+          `Name: ${fullName || '-'}`,
+          `My WhatsApp: ${whatsappNumber || '-'}`,
+          `Email: ${email || '-'}`,
+          `Message: ${messageText || '-'}`,
+        ].join('\n');
+
+        const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
+        setPopup({
+          open: true,
+          title: 'Opening WhatsApp',
+          message: 'Your message is ready. Please send it in WhatsApp to complete your inquiry.',
+        });
         form.reset();
       }
     };
@@ -393,58 +483,7 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       const installBtn = target.closest('[data-install-app]');
       if (installBtn) {
         event.preventDefault();
-        const deferredPrompt = installPromptRef.current;
-        const ua = navigator.userAgent || '';
-        const isIos = /iPhone|iPad|iPod/i.test(ua);
-        const isAndroid = /Android/i.test(ua);
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-        if (isStandalone) {
-          setInstallModal({
-            open: true,
-            title: 'Already Installed',
-            message: 'This app is already installed on your device.',
-            canInstall: false,
-          });
-          return;
-        }
-
-        if (deferredPrompt) {
-          setInstallModal({
-            open: true,
-            title: 'Install Biltronix App',
-            message: 'Tap Install Now to add Biltronix to your device.',
-            canInstall: true,
-          });
-          return;
-        }
-
-        if (isIos) {
-          setInstallModal({
-            open: true,
-            title: 'Install on iPhone/iPad',
-            message: 'Tap Share in Safari, then choose Add to Home Screen.',
-            canInstall: false,
-          });
-          return;
-        }
-
-        if (isAndroid) {
-          setInstallModal({
-            open: true,
-            title: 'Install on Android',
-            message: 'Open browser menu and tap Install app or Add to Home screen.',
-            canInstall: false,
-          });
-          return;
-        }
-
-        setInstallModal({
-          open: true,
-          title: 'Install App',
-          message: 'In your browser menu, choose Install App or Create Shortcut to install Biltronix.',
-          canInstall: false,
-        });
+        openInstallDialog();
       }
     };
 
@@ -460,6 +499,12 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
     root.addEventListener('click', onClick);
     root.addEventListener('input', onInput);
 
+    root.querySelectorAll('[data-install-app]').forEach((node) => {
+      if (node instanceof HTMLElement) {
+        node.style.display = 'none';
+      }
+    });
+
     const escapeHtml = (value) =>
       String(value || '')
         .replaceAll('&', '&amp;')
@@ -470,12 +515,32 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
 
     const storeHighlightsList = root.querySelector('[data-store-highlights-list]');
     if (storeHighlightsList instanceof HTMLElement) {
+      const toCategoryClass = (category) => {
+        const value = String(category || '').toLowerCase();
+        if (value.includes('vehicle')) return 'cat-vehicle';
+        if (value.includes('part')) return 'cat-parts';
+        if (value.includes('accessor')) return 'cat-accessories';
+        return 'cat-generic';
+      };
+
+      const getHighlightIcon = (category) => {
+        const value = String(category || '').toLowerCase();
+        if (value.includes('vehicle')) return 'fa-car-side';
+        if (value.includes('part')) return 'fa-cogs';
+        if (value.includes('accessor')) return 'fa-toolbox';
+        return 'fa-store';
+      };
+
       const renderStoreHighlights = (items) => {
         const safeItems = Array.isArray(items) && items.length > 0 ? items : FALLBACK_STORE_HIGHLIGHTS;
         const markup = safeItems
           .map(
             (item) => `
-              <article class="store-highlight-card">
+              <article class="store-highlight-card ${toCategoryClass(item.category || item.title)}">
+                <div class="store-highlight-top">
+                  <div class="store-highlight-icon"><i class="fas ${getHighlightIcon(item.category || item.title)}"></i></div>
+                  <span class="store-highlight-ad"><i class="fas fa-bullhorn"></i> Featured</span>
+                </div>
                 <span class="store-highlight-tag">${escapeHtml(item.category || 'General')}</span>
                 <h3>${escapeHtml(item.title || 'Untitled')}</h3>
                 <p>${escapeHtml(item.summary || '')}</p>
@@ -649,6 +714,45 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
   return (
     <>
       <div ref={containerRef} dangerouslySetInnerHTML={{ __html: parts.bodyHtml }} />
+      {showInstallSidePrompt && (
+        <aside className='install-side-prompt' aria-label='Install app prompt'>
+          <button
+            type='button'
+            className='install-side-close'
+            onClick={() => {
+              setShowInstallSidePrompt(false);
+              try {
+                window.sessionStorage.setItem(INSTALL_BANNER_SESSION_KEY, '1');
+              } catch {
+                // ignore session storage failures
+              }
+            }}
+            aria-label='Close install prompt'
+          >
+            <i className='fas fa-times' />
+          </button>
+          <div className='install-side-icon'>
+            <i className='fas fa-mobile-screen-button' />
+          </div>
+          <h3>Install Biltronix App</h3>
+          <p>Add this site to your phone or desktop for faster access.</p>
+          <button
+            type='button'
+            className='install-side-btn'
+            onClick={() => {
+              setShowInstallSidePrompt(false);
+              try {
+                window.sessionStorage.setItem(INSTALL_BANNER_SESSION_KEY, '1');
+              } catch {
+                // ignore session storage failures
+              }
+              openInstallDialog();
+            }}
+          >
+            Install Now
+          </button>
+        </aside>
+      )}
       {popup.open && (
         <div className='site-popup-overlay' role='dialog' aria-modal='true' aria-labelledby='site-popup-title'>
           <div className='site-popup-card'>

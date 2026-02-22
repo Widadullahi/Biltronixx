@@ -65,6 +65,69 @@ body,
   cursor: pointer;
 }
 
+.install-side-prompt {
+  position: fixed;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 99997;
+  width: min(290px, calc(100vw - 22px));
+  background: linear-gradient(145deg, #14305f, #ef233c);
+  color: #fff;
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 20px 34px rgba(11, 24, 46, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+}
+
+.install-side-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.46);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.install-side-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.install-side-prompt h3 {
+  margin: 10px 0 6px;
+  font-size: 1.03rem;
+}
+
+.install-side-prompt p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
+.install-side-btn {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #14305f;
+  font-weight: 800;
+  cursor: pointer;
+  width: 100%;
+}
+
 .store-detail-overlay {
   position: fixed;
   inset: 0;
@@ -186,6 +249,14 @@ body,
 }
 
 @media (max-width: 780px) {
+  .install-side-prompt {
+    top: auto;
+    right: 10px;
+    bottom: 78px;
+    transform: none;
+    width: min(330px, calc(100vw - 20px));
+  }
+
   .store-detail-card {
     grid-template-columns: 1fr;
     max-height: 90vh;

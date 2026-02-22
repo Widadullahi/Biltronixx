@@ -83,10 +83,32 @@
 
     .nav-links a {
       text-decoration: none;
-      color: var(--blue);
-      font-weight: 600;
+      color: #0f2747;
+      font-weight: 700;
       padding: 9px 12px;
       border-radius: 999px;
+      border: 1px solid #d5e1f2;
+      background: #f8fbff;
+      box-shadow: 0 6px 14px rgba(15, 39, 71, 0.08);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .nav-links a:hover {
+      transform: translateY(-1px);
+      background: #eef5ff;
+      box-shadow: 0 10px 18px rgba(15, 39, 71, 0.13);
+    }
+
+    .nav-links a.install {
+      color: #fff;
+      background: linear-gradient(135deg, #0b8f6f, #0ba77f);
+      border-color: rgba(9, 122, 97, 0.7);
+      box-shadow: 0 10px 20px rgba(11, 159, 121, 0.32);
+    }
+
+    .nav-links a.install:hover {
+      background: linear-gradient(135deg, #0a8265, #0a9974);
+      box-shadow: 0 14px 24px rgba(11, 159, 121, 0.4);
     }
 
     .nav-links a.cta { background: var(--red); color: #fff; }
@@ -257,9 +279,24 @@
 
     @media (max-width: 620px) {
       .topbar { font-size: 0.82rem; }
-      .nav-inner { padding: 8px 0; }
+      .nav-inner {
+        min-height: auto;
+        padding: 10px 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
       .brand { font-size: 1.05rem; }
-      .nav-links a { font-size: 0.88rem; padding: 7px 10px; }
+      .brand { justify-content: center; }
+      .nav-links {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .nav-links a { font-size: 0.88rem; padding: 10px 8px; text-align: center; }
+      .nav-links a.install,
+      .nav-links a.cta { grid-column: span 2; }
       .filter-btn { padding: 8px 12px; font-size: 0.86rem; }
       .products-grid { grid-template-columns: 1fr; }
       .product-card img { height: 210px; }
@@ -281,7 +318,7 @@
         <a href="/">Home</a>
         <a href="/#services">Services</a>
         <a href="/car-tips">Car Tips</a>
-        <a href="#" data-install-app>Install App</a>
+        <a href="#" data-install-app class="install"><i class="fas fa-download"></i> Install App</a>
         <a href="/sales" class="cta">Our Store</a>
       </div>
     </div>
