@@ -141,6 +141,7 @@ export default function CarTipsPage() {
           <div className='tips-grid'>
             {filteredTips.map((tip, index) => (
               <article key={`${tip.title}-${index}`} className='tips-card'>
+                {tip.imageUrl ? <img src={tip.imageUrl} alt={tip.title || 'Car tip'} /> : null}
                 <span className='tips-chip'>{tip.category || 'General'}</span>
                 <h2>{tip.title || 'Untitled Tip'}</h2>
                 <p>{tip.body || ''}</p>

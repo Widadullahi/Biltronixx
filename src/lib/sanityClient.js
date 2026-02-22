@@ -78,9 +78,11 @@ function normalizeInventory(item) {
 
 function normalizeCarTip(item) {
   return {
+    _id: item._id,
     title: item.title || 'Untitled Tip',
     body: item.body || '',
     category: item.category || 'General',
+    imageUrl: item.imageUrl || '',
     order: toNumber(item.order, 999),
   };
 }
@@ -101,6 +103,10 @@ function normalizeStockItem(item) {
     _id: item._id,
     name: item.name || 'Untitled Item',
     description: item.description || '',
+    primaryImageUrl: item.primaryImageUrl || '',
+    featureImageUrl: item.featureImageUrl || '',
+    otherImageUrls: Array.isArray(item.otherImageUrls) ? item.otherImageUrls : [],
+    soldOut: Boolean(item.soldOut),
     category: item.category || 'car-parts',
     stock: toNumber(item.stock),
     sold: toNumber(item.sold),
@@ -149,11 +155,69 @@ export async function fetchCarTips(limit = 6) {
       title,
       body,
       category,
+      imageUrl,
       order
     }`
   );
 
   return tipDocs.map(normalizeCarTip);
+}
+
+export async function createCarTip(payload) {
+  if (!sanityWriteClient) {
+    throw new Error(
+      'Missing write token. Set VITE_SANITY_API_WRITE_TOKEN to enable create/update for car tips.'
+    );
+  }
+
+  const imageUrl = payload.imageFile ? await uploadImageFile(payload.imageFile) : '';
+  const created = await sanityWriteClient.create({
+    _type: 'carTip',
+    title: payload.title || '',
+    body: payload.body || '',
+    category: payload.category || 'General',
+    imageUrl: imageUrl || '',
+    order: toNumber(payload.order, 999),
+  });
+
+  return normalizeCarTip(created);
+}
+
+export async function updateCarTip(tipId, updates) {
+  if (!sanityWriteClient) {
+    throw new Error(
+      'Missing write token. Set VITE_SANITY_API_WRITE_TOKEN to enable create/update for car tips.'
+    );
+  }
+
+  let imageUrl = updates.imageUrl || '';
+  if (updates.imageFile) {
+    imageUrl = await uploadImageFile(updates.imageFile);
+  }
+
+  const patched = await sanityWriteClient
+    .patch(tipId)
+    .set({
+      title: updates.title || '',
+      body: updates.body || '',
+      category: updates.category || 'General',
+      imageUrl,
+      order: toNumber(updates.order, 999),
+    })
+    .commit();
+
+  return normalizeCarTip(patched);
+}
+
+export async function deleteCarTip(tipId) {
+  if (!sanityWriteClient) {
+    throw new Error(
+      'Missing write token. Set VITE_SANITY_API_WRITE_TOKEN to enable create/update for car tips.'
+    );
+  }
+
+  await sanityWriteClient.delete(tipId);
+  return tipId;
 }
 
 export async function fetchStoreHighlights(limit = 6) {
@@ -190,6 +254,10 @@ export async function fetchStockItems(limit = 300) {
       _id,
       name,
       description,
+      primaryImageUrl,
+      featureImageUrl,
+      otherImageUrls,
+      soldOut,
       category,
       stock,
       sold,
@@ -206,6 +274,27 @@ export async function fetchStockItems(limit = 300) {
   return docs.map(normalizeStockItem);
 }
 
+async function uploadImageFile(file) {
+  if (!file || !sanityWriteClient) return '';
+  const asset = await sanityWriteClient.assets.upload('image', file, {
+    filename: file.name || `image-${Date.now()}.jpg`,
+  });
+  if (!asset?._ref) return '';
+  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${asset._ref
+    .replace('image-', '')
+    .replace('-jpg', '.jpg')
+    .replace('-jpeg', '.jpeg')
+    .replace('-png', '.png')
+    .replace('-webp', '.webp')}`;
+}
+
+async function uploadImageFiles(files) {
+  const safeFiles = Array.isArray(files) ? files.filter(Boolean) : [];
+  if (safeFiles.length === 0) return [];
+  const uploads = await Promise.all(safeFiles.map((file) => uploadImageFile(file)));
+  return uploads.filter(Boolean);
+}
+
 export async function createStockItem(payload) {
   if (!sanityWriteClient) {
     throw new Error(
@@ -213,10 +302,20 @@ export async function createStockItem(payload) {
     );
   }
 
+  const [primaryImageUrl, featureImageUrl, otherImageUrls] = await Promise.all([
+    uploadImageFile(payload.primaryImageFile),
+    uploadImageFile(payload.featureImageFile),
+    uploadImageFiles(payload.otherImageFiles),
+  ]);
+
   const created = await sanityWriteClient.create({
     _type: 'stockItem',
     name: payload.name,
     description: payload.description || '',
+    primaryImageUrl,
+    featureImageUrl,
+    otherImageUrls,
+    soldOut: Boolean(payload.soldOut),
     category: payload.category,
     stock: toNumber(payload.stock),
     sold: toNumber(payload.sold),
@@ -244,6 +343,10 @@ export async function updateStockItem(itemId, updates) {
     .set({
       name: updates.name,
       description: updates.description || '',
+      primaryImageUrl: updates.primaryImageUrl || '',
+      featureImageUrl: updates.featureImageUrl || '',
+      otherImageUrls: Array.isArray(updates.otherImageUrls) ? updates.otherImageUrls : [],
+      soldOut: Boolean(updates.soldOut),
       stock: toNumber(updates.stock),
       sold: toNumber(updates.sold),
       unitPrice: toNumber(updates.unitPrice),
@@ -257,6 +360,34 @@ export async function updateStockItem(itemId, updates) {
     .commit();
 
   return normalizeStockItem(patched);
+}
+
+export async function setStockItemSoldStatus(itemId, soldOut) {
+  if (!sanityWriteClient) {
+    throw new Error(
+      'Missing write token. Set VITE_SANITY_API_WRITE_TOKEN to enable create/update for stock items.'
+    );
+  }
+
+  const patched = await sanityWriteClient
+    .patch(itemId)
+    .set({
+      soldOut: Boolean(soldOut),
+    })
+    .commit();
+
+  return normalizeStockItem(patched);
+}
+
+export async function deleteStockItem(itemId) {
+  if (!sanityWriteClient) {
+    throw new Error(
+      'Missing write token. Set VITE_SANITY_API_WRITE_TOKEN to enable create/update for stock items.'
+    );
+  }
+
+  await sanityWriteClient.delete(itemId);
+  return itemId;
 }
 
 function generateBookingId() {

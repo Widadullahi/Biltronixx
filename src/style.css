@@ -64,3 +64,136 @@ body,
   font-weight: 700;
   cursor: pointer;
 }
+
+.store-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: rgba(8, 20, 41, 0.6);
+  display: grid;
+  place-items: center;
+  padding: 14px;
+}
+
+.store-detail-card {
+  width: min(880px, 100%);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 24px 44px rgba(10, 28, 54, 0.35);
+  border: 1px solid #dce7f7;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px;
+  position: relative;
+}
+
+.store-detail-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #d8e3f4;
+  background: #fff;
+  color: #12315f;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.store-detail-media img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #dce7f7;
+}
+
+.store-detail-noimage {
+  height: 300px;
+  border: 1px dashed #c8d8f1;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #5f7498;
+}
+
+.store-detail-controls {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.store-detail-controls button {
+  border: 1px solid #d3def0;
+  background: #fff;
+  color: #163865;
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-weight: 700;
+}
+
+.store-detail-controls span {
+  color: #4e6488;
+  font-weight: 600;
+}
+
+.store-detail-content {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-top: 20px;
+}
+
+.store-detail-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #edf3ff;
+  color: #14305f;
+  border: 1px solid #d8e3f4;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.store-detail-content h3 {
+  margin: 0;
+  color: #14305f;
+}
+
+.store-detail-content p {
+  margin: 0;
+  color: #556a8c;
+  line-height: 1.55;
+}
+
+.store-detail-price {
+  color: #ef233c !important;
+  font-size: 1.22rem;
+  font-weight: 800;
+}
+
+.store-detail-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #4e6488;
+  line-height: 1.5;
+}
+
+@media (max-width: 780px) {
+  .store-detail-card {
+    grid-template-columns: 1fr;
+    max-height: 90vh;
+    overflow: auto;
+  }
+
+  .store-detail-media img,
+  .store-detail-noimage {
+    height: 220px;
+  }
+}

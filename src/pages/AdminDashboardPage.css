@@ -161,6 +161,12 @@
   cursor: not-allowed;
 }
 
+.admin-refresh-btn.danger {
+  border-color: #f4c2ca;
+  color: #8e1f1f;
+  background: #fff6f7;
+}
+
 .admin-error-text {
   color: #8e1f1f;
   margin-top: 8px;
@@ -388,6 +394,51 @@
   padding: 16px;
 }
 
+.admin-row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-tip-form {
+  margin: 8px 0 14px;
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr 120px 1fr 2fr auto auto;
+  gap: 10px;
+}
+
+.admin-tip-form input,
+.admin-tip-form textarea {
+  width: 100%;
+  border: 1px solid #d6dbe5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  color: #1a202c;
+}
+
+.admin-tip-form textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.admin-tip-image-cell {
+  min-width: 92px;
+}
+
+.admin-tip-image-cell img {
+  width: 86px;
+  height: 56px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #d8e2f4;
+}
+
+.admin-tip-image-cell span {
+  color: #657187;
+  font-size: 0.84rem;
+}
+
 .inv-number {
   font-size: 1.3rem;
   font-weight: 700;
@@ -576,6 +627,10 @@
   }
 
   .admin-stock-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-tip-form {
     grid-template-columns: 1fr;
   }
 

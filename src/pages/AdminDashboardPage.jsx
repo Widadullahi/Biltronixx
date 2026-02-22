@@ -1,10 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  createCarTip,
   createStockItem,
+  deleteCarTip,
+  deleteStockItem,
   fetchAdminDashboardData,
+  fetchCarTips,
   fetchStockItems,
-  updateStockItem,
+  setStockItemSoldStatus,
+  updateCarTip,
 } from '../lib/sanityClient.js';
 import './AdminDashboardPage.css';
 
@@ -13,12 +18,6 @@ function toSlug(input) {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-');
-}
-
-function getInventoryState(item) {
-  if (item.stock <= item.threshold / 2) return 'critical';
-  if (item.stock <= item.threshold) return 'low';
-  return 'healthy';
 }
 
 function formatDate(dateString) {
@@ -51,7 +50,7 @@ export default function AdminDashboardPage() {
   const [bookingQuery, setBookingQuery] = useState('');
   const [orderChannel, setOrderChannel] = useState('all');
   const [orderQuery, setOrderQuery] = useState('');
-  const [dashboardData, setDashboardData] = useState({ bookings: [], orders: [], inventory: [] });
+  const [dashboardData, setDashboardData] = useState({ bookings: [], orders: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [stockItems, setStockItems] = useState([]);
@@ -59,9 +58,22 @@ export default function AdminDashboardPage() {
   const [stockError, setStockError] = useState('');
   const [stockMessage, setStockMessage] = useState('');
   const [savingItemId, setSavingItemId] = useState('');
+  const [carTips, setCarTips] = useState([]);
+  const [tipsLoading, setTipsLoading] = useState(true);
+  const [tipsError, setTipsError] = useState('');
+  const [tipsMessage, setTipsMessage] = useState('');
+  const [savingTipId, setSavingTipId] = useState('');
+  const [newTipTitle, setNewTipTitle] = useState('');
+  const [newTipBody, setNewTipBody] = useState('');
+  const [newTipCategory, setNewTipCategory] = useState('General');
+  const [newTipOrder, setNewTipOrder] = useState('1');
+  const [newTipImageFile, setNewTipImageFile] = useState(null);
   const [newItemName, setNewItemName] = useState('');
   const [newItemDescription, setNewItemDescription] = useState('');
   const [newItemUnitPrice, setNewItemUnitPrice] = useState('');
+  const [newPrimaryImageFile, setNewPrimaryImageFile] = useState(null);
+  const [newFeatureImageFile, setNewFeatureImageFile] = useState(null);
+  const [newOtherImageFiles, setNewOtherImageFiles] = useState([]);
   const [newVehicleMake, setNewVehicleMake] = useState('');
   const [newVehicleModel, setNewVehicleModel] = useState('');
   const [newVehicleDescription, setNewVehicleDescription] = useState('');
@@ -72,6 +84,7 @@ export default function AdminDashboardPage() {
   const [showVehicleForm, setShowVehicleForm] = useState(false);
   const [showCarPartForm, setShowCarPartForm] = useState(false);
   const [showAccessoriesForm, setShowAccessoriesForm] = useState(false);
+  const [showTipForm, setShowTipForm] = useState(false);
 
   const todayIso = useMemo(() => new Date().toISOString().split('T')[0], []);
 
@@ -83,7 +96,7 @@ export default function AdminDashboardPage() {
       const data = await fetchAdminDashboardData();
       setDashboardData(data);
     } catch (loadError) {
-      setDashboardData({ bookings: [], orders: [], inventory: [] });
+      setDashboardData({ bookings: [], orders: [] });
       setError(loadError instanceof Error ? loadError.message : 'Failed to load dashboard data from Sanity.');
     } finally {
       setIsLoading(false);
@@ -103,7 +116,7 @@ export default function AdminDashboardPage() {
       setStockItems(items);
     } catch (loadError) {
       setStockItems([]);
-      setStockError(loadError instanceof Error ? loadError.message : 'Failed to load stock items.');
+      setStockError(loadError instanceof Error ? loadError.message : 'Failed to load items.');
     } finally {
       setStockLoading(false);
     }
@@ -113,9 +126,26 @@ export default function AdminDashboardPage() {
     loadStockItems();
   }, []);
 
+  const loadCarTips = async () => {
+    setTipsLoading(true);
+    setTipsError('');
+    try {
+      const tips = await fetchCarTips(200);
+      setCarTips(tips);
+    } catch (loadError) {
+      setCarTips([]);
+      setTipsError(loadError instanceof Error ? loadError.message : 'Failed to load car tips.');
+    } finally {
+      setTipsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCarTips();
+  }, []);
+
   const bookings = dashboardData.bookings;
   const orders = dashboardData.orders;
-  const inventory = dashboardData.inventory;
 
   const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
@@ -143,25 +173,17 @@ export default function AdminDashboardPage() {
     });
   }, [orders, orderChannel, orderQuery]);
 
-  const inventorySummary = useMemo(() => {
-    const lowStockItems = inventory.filter((item) => getInventoryState(item) !== 'healthy');
-    const criticalStockItems = inventory.filter((item) => getInventoryState(item) === 'critical');
-    const totalUnits = inventory.reduce((sum, item) => sum + item.stock, 0);
-    return { criticalStockItems, lowStockItems, totalUnits };
-  }, [inventory]);
-
   const metrics = useMemo(() => {
-    const todayBookings = bookings.filter((booking) => booking.date === todayIso).length;
-    const openOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, order) => sum + order.amountValue, 0);
+    const vehicleCount = stockItems.filter((item) => item.category === 'vehicle').length;
+    const carPartCount = stockItems.filter((item) => item.category === 'car-parts').length;
+    const accessoriesCount = stockItems.filter((item) => item.category === 'accessories').length;
 
     return [
-      { label: 'Today Bookings', value: String(todayBookings), icon: 'fa-calendar-check' },
-      { label: 'Open Orders', value: String(openOrders), icon: 'fa-cart-shopping' },
-      { label: 'Revenue (MTD)', value: naira.format(totalRevenue), icon: 'fa-chart-line' },
-      { label: 'Low Stock Items', value: String(inventorySummary.lowStockItems.length), icon: 'fa-triangle-exclamation' },
+      { label: 'Total Vehicles', value: String(vehicleCount), icon: 'fa-car-side' },
+      { label: 'Total Car Parts', value: String(carPartCount), icon: 'fa-cogs' },
+      { label: 'Total Accessories', value: String(accessoriesCount), icon: 'fa-toolbox' },
     ];
-  }, [bookings, orders, inventorySummary.lowStockItems.length, todayIso]);
+  }, [stockItems]);
 
   const revenueByChannel = useMemo(() => {
     const totals = orders.reduce((acc, order) => {
@@ -211,21 +233,6 @@ export default function AdminDashboardPage() {
     return { totalVehicles: vehicles.length, newCount, foreignUsedCount, nigerianUsedCount };
   }, [stockItems]);
 
-  const saveStockRow = async (item) => {
-    setStockMessage('');
-    setStockError('');
-    setSavingItemId(item._id);
-    try {
-      const updated = await updateStockItem(item._id, item);
-      setStockItems((prev) => prev.map((entry) => (entry._id === updated._id ? updated : entry)));
-      setStockMessage(`${updated.name} updated.`);
-    } catch (saveError) {
-      setStockError(saveError instanceof Error ? saveError.message : 'Could not update stock item.');
-    } finally {
-      setSavingItemId('');
-    }
-  };
-
   const addStockItem = async () => {
     if (!activeStockCategory) return;
 
@@ -242,9 +249,11 @@ export default function AdminDashboardPage() {
         payload = {
           name: vehicleName,
           description: newVehicleDescription.trim(),
+          primaryImageFile: newPrimaryImageFile,
+          featureImageFile: newFeatureImageFile,
+          otherImageFiles: newOtherImageFiles,
+          soldOut: false,
           category: activeStockCategory,
-          stock: 0,
-          sold: 0,
           unitPrice: newItemUnitPrice,
           make: newVehicleMake.trim(),
           model: newVehicleModel.trim(),
@@ -260,9 +269,11 @@ export default function AdminDashboardPage() {
         payload = {
           name: newItemName.trim(),
           description: newItemDescription.trim(),
+          primaryImageFile: newPrimaryImageFile,
+          featureImageFile: newFeatureImageFile,
+          otherImageFiles: newOtherImageFiles,
+          soldOut: false,
           category: activeStockCategory,
-          stock: 0,
-          sold: 0,
           unitPrice: newItemUnitPrice,
         };
       }
@@ -274,6 +285,9 @@ export default function AdminDashboardPage() {
       setNewItemName('');
       setNewItemDescription('');
       setNewItemUnitPrice('');
+      setNewPrimaryImageFile(null);
+      setNewFeatureImageFile(null);
+      setNewOtherImageFiles([]);
       setNewVehicleMake('');
       setNewVehicleModel('');
       setNewVehicleDescription('');
@@ -286,7 +300,7 @@ export default function AdminDashboardPage() {
       setShowAccessoriesForm(false);
       setStockMessage(`${created.name} added.`);
     } catch (createError) {
-      const fallbackMessage = 'Could not add stock item.';
+      const fallbackMessage = 'Could not add item.';
       const rawMessage = createError instanceof Error ? createError.message : fallbackMessage;
       if (rawMessage.includes('Missing write token')) {
         setStockError('Write access is not configured. Add VITE_SANITY_API_WRITE_TOKEN in .env and restart the app.');
@@ -298,11 +312,108 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const toggleSoldStatus = async (item) => {
+    setStockError('');
+    setStockMessage('');
+    setSavingItemId(item._id);
+    try {
+      const updated = await setStockItemSoldStatus(item._id, !item.soldOut);
+      setStockItems((prev) => prev.map((entry) => (entry._id === updated._id ? updated : entry)));
+      setStockMessage(`${updated.name} marked as ${updated.soldOut ? 'Sold' : 'Available'}.`);
+    } catch (toggleError) {
+      setStockError(toggleError instanceof Error ? toggleError.message : 'Could not update sold status.');
+    } finally {
+      setSavingItemId('');
+    }
+  };
+
+  const removeItem = async (item) => {
+    const okay = window.confirm(`Delete "${item.name}"? This action cannot be undone.`);
+    if (!okay) return;
+    setStockError('');
+    setStockMessage('');
+    setSavingItemId(item._id);
+    try {
+      await deleteStockItem(item._id);
+      setStockItems((prev) => prev.filter((entry) => entry._id !== item._id));
+      setStockMessage(`${item.name} deleted.`);
+    } catch (deleteError) {
+      setStockError(deleteError instanceof Error ? deleteError.message : 'Could not delete item.');
+    } finally {
+      setSavingItemId('');
+    }
+  };
+
+  const addCarTip = async () => {
+    if (!newTipTitle.trim() || !newTipBody.trim()) {
+      setTipsError('Tip title and content are required.');
+      return;
+    }
+
+    setTipsError('');
+    setTipsMessage('');
+    setSavingTipId('new');
+    try {
+      const created = await createCarTip({
+        title: newTipTitle.trim(),
+        body: newTipBody.trim(),
+        category: newTipCategory.trim() || 'General',
+        order: newTipOrder,
+        imageFile: newTipImageFile,
+      });
+      setCarTips((prev) => [...prev, created].sort((a, b) => (a.order || 999) - (b.order || 999)));
+      setNewTipTitle('');
+      setNewTipBody('');
+      setNewTipCategory('General');
+      setNewTipOrder('1');
+      setNewTipImageFile(null);
+      setShowTipForm(false);
+      setTipsMessage('Car tip added.');
+    } catch (saveError) {
+      setTipsError(saveError instanceof Error ? saveError.message : 'Could not add car tip.');
+    } finally {
+      setSavingTipId('');
+    }
+  };
+
+  const saveCarTipRow = async (tip) => {
+    setTipsError('');
+    setTipsMessage('');
+    setSavingTipId(tip._id);
+    try {
+      const updated = await updateCarTip(tip._id, tip);
+      setCarTips((prev) => prev.map((entry) => (entry._id === updated._id ? updated : entry)));
+      setTipsMessage('Car tip updated.');
+    } catch (saveError) {
+      setTipsError(saveError instanceof Error ? saveError.message : 'Could not update car tip.');
+    } finally {
+      setSavingTipId('');
+    }
+  };
+
+  const removeCarTip = async (tip) => {
+    const okay = window.confirm(`Delete tip "${tip.title}"?`);
+    if (!okay) return;
+    setTipsError('');
+    setTipsMessage('');
+    setSavingTipId(tip._id);
+    try {
+      await deleteCarTip(tip._id);
+      setCarTips((prev) => prev.filter((entry) => entry._id !== tip._id));
+      setTipsMessage('Car tip deleted.');
+    } catch (deleteError) {
+      setTipsError(deleteError instanceof Error ? deleteError.message : 'Could not delete car tip.');
+    } finally {
+      setSavingTipId('');
+    }
+  };
+
   const handlePanelChange = (panel) => {
     setActivePanel(panel);
     if (panel !== 'vehicle') setShowVehicleForm(false);
     if (panel !== 'car-parts') setShowCarPartForm(false);
     if (panel !== 'accessories') setShowAccessoriesForm(false);
+    if (panel !== 'car-tips') setShowTipForm(false);
     if (window.matchMedia('(max-width: 960px)').matches) {
       setSidebarOpen(false);
     }
@@ -318,14 +429,6 @@ export default function AdminDashboardPage() {
         >
           <i className='fas fa-gauge-high' /> Overview
         </button>
-        {/*
-        <button
-          className={`admin-nav-btn ${activePanel === 'inventory' ? 'active' : ''}`}
-          onClick={() => handlePanelChange('inventory')}
-        >
-          <i className='fas fa-warehouse' /> Inventory
-        </button>
-        */}
         <button
           className={`admin-nav-btn ${activePanel === 'vehicle' ? 'active' : ''}`}
           onClick={() => handlePanelChange('vehicle')}
@@ -343,6 +446,12 @@ export default function AdminDashboardPage() {
           onClick={() => handlePanelChange('accessories')}
         >
           <i className='fas fa-toolbox' /> Accessories
+        </button>
+        <button
+          className={`admin-nav-btn ${activePanel === 'car-tips' ? 'active' : ''}`}
+          onClick={() => handlePanelChange('car-tips')}
+        >
+          <i className='fas fa-lightbulb' /> Car Tips
         </button>
         <div className='admin-sidebar-links'>
           <Link className='admin-link-btn home' to='/' onClick={() => setSidebarOpen(false)}>
@@ -368,7 +477,7 @@ export default function AdminDashboardPage() {
             </button>
             <h1>Operations Dashboard</h1>
           </div>
-          <p>Track bookings, orders, and inventory from one place.</p>
+          <p>Track bookings, orders, and item listings from one place.</p>
           <div className='admin-data-state'>
             <button className='admin-refresh-btn' type='button' onClick={loadDashboardData} disabled={isLoading}>
               {isLoading ? 'Refreshing...' : 'Refresh Data'}
@@ -423,22 +532,6 @@ export default function AdminDashboardPage() {
                   ))}
                   {revenueByChannel.length === 0 && <li className='empty-row'>No order revenue data yet.</li>}
                 </ul>
-              </article>
-              <article className='admin-card'>
-                <h2>Inventory Snapshot</h2>
-                <p className='inv-number'>{inventorySummary.totalUnits} total units</p>
-                <p className='inv-threshold'>Critical Items: {inventorySummary.criticalStockItems.length}</p>
-                <p className='inv-threshold'>Low Stock Alerts: {inventorySummary.lowStockItems.length}</p>
-                {inventorySummary.lowStockItems.length > 0 && (
-                  <ul className='admin-list compact'>
-                    {inventorySummary.lowStockItems.map((item) => (
-                      <li key={item.name}>
-                        <span>{item.name}</span>
-                        <span className={`pill ${getInventoryState(item)}`}>{item.stock} units</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
               </article>
             </section>
           </>
@@ -548,59 +641,16 @@ export default function AdminDashboardPage() {
           </section>
         )}
 
-        {/*
-        {activePanel === 'inventory' && (
-          <section className='admin-card'>
-            <h2>Inventory Health</h2>
-            <table className='admin-table'>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Stock</th>
-                  <th>Threshold</th>
-                  <th>Coverage</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventory.map((item) => {
-                  const state = getInventoryState(item);
-                  const percentage = Math.max(10, Math.min(100, Math.round((item.stock / item.threshold) * 100)));
-                  return (
-                    <tr key={item.name}>
-                      <td>{item.name}</td>
-                      <td>{item.stock}</td>
-                      <td>{item.threshold}</td>
-                      <td>
-                        <div className='channel-track'>
-                          <span className='channel-fill' style={{ width: `${percentage}%` }} />
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`pill ${state}`}>
-                          {state === 'healthy' ? 'Healthy' : state === 'low' ? 'Low' : 'Critical'}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {inventory.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className='empty-row'>
-                      No inventory records found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </section>
-        )}
-        */}
-
         {(activePanel === 'vehicle' || activePanel === 'car-parts' || activePanel === 'accessories') && (
           <section className='admin-card'>
-            <h2>{activeStockMeta?.label} Stock Manager</h2>
-            <p className='inv-threshold'>Add items and update stock.</p>
+            <h2>{activeStockMeta?.label} Manager</h2>
+            <p className='inv-threshold'>
+              {activePanel === 'vehicle'
+                ? 'Add vehicles.'
+                : activePanel === 'car-parts'
+                ? 'Add car parts.'
+                : 'Add accessories.'}
+            </p>
 
             {activePanel === 'vehicle' && (
               <section className='admin-grid'>
@@ -650,6 +700,9 @@ export default function AdminDashboardPage() {
                     className='admin-refresh-btn'
                     type='button'
                     onClick={() => {
+                      setNewPrimaryImageFile(null);
+                      setNewFeatureImageFile(null);
+                      setNewOtherImageFiles([]);
                       setShowVehicleForm(true);
                       setShowCarPartForm(false);
                       setShowAccessoriesForm(false);
@@ -669,6 +722,9 @@ export default function AdminDashboardPage() {
                   className='admin-refresh-btn'
                   type='button'
                   onClick={() => {
+                    setNewPrimaryImageFile(null);
+                    setNewFeatureImageFile(null);
+                    setNewOtherImageFiles([]);
                     if (activePanel === 'car-parts') {
                       setShowCarPartForm(true);
                       setShowAccessoriesForm(false);
@@ -696,17 +752,19 @@ export default function AdminDashboardPage() {
                 {activePanel === 'vehicle' ? (
                   <tr>
                     <th>Vehicle</th>
+                    <th>Description</th>
                     <th>Condition</th>
                     <th>Transmission</th>
                     <th>Fuel</th>
-                    <th>Stock</th>
+                    <th>Status</th>
                     <th>Unit Price</th>
                     <th>Action</th>
                   </tr>
                 ) : (
                   <tr>
                     <th>Item</th>
-                    <th>Stock</th>
+                    <th>Description</th>
+                    <th>Status</th>
                     <th>Unit Price</th>
                     <th>Action</th>
                   </tr>
@@ -716,189 +774,164 @@ export default function AdminDashboardPage() {
                 {stockItemsByCategory.map((item) => (
                   activePanel === 'vehicle' ? (
                     <tr key={item._id}>
+                      <td>{item.name}</td>
+                      <td>{item.description || '-'}</td>
+                      <td>{item.condition || '-'}</td>
+                      <td>{item.transmission || '-'}</td>
+                      <td>{item.fuelType || '-'}</td>
                       <td>
-                        <input
-                          type='text'
-                          value={item.name}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id ? { ...entry, name: event.target.value } : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
+                        <span className={`pill ${item.soldOut ? 'critical' : 'healthy'}`}>{item.soldOut ? 'Sold' : 'Available'}</span>
                       </td>
+                      <td>{naira.format(item.unitPrice || 0)}</td>
                       <td>
-                        <select
-                          value={item.condition || VEHICLE_CONDITIONS[0]}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id ? { ...entry, condition: event.target.value } : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        >
-                          {VEHICLE_CONDITIONS.map((condition) => (
-                            <option key={condition} value={condition}>
-                              {condition}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          value={item.transmission || VEHICLE_TRANSMISSIONS[0]}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id ? { ...entry, transmission: event.target.value } : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        >
-                          {VEHICLE_TRANSMISSIONS.map((transmission) => (
-                            <option key={transmission} value={transmission}>
-                              {transmission}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          value={item.fuelType || VEHICLE_FUEL_TYPES[0]}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id ? { ...entry, fuelType: event.target.value } : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        >
-                          {VEHICLE_FUEL_TYPES.map((fuel) => (
-                            <option key={fuel} value={fuel}>
-                              {fuel}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          type='number'
-                          min='0'
-                          value={item.stock}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id
-                                  ? { ...entry, stock: Number.parseInt(event.target.value, 10) || 0 }
-                                  : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type='number'
-                          min='0'
-                          value={item.unitPrice}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id
-                                  ? { ...entry, unitPrice: Number.parseInt(event.target.value, 10) || 0 }
-                                  : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
-                      </td>
-                      <td>
-                        <button
-                          className='admin-refresh-btn'
-                          type='button'
-                          onClick={() => saveStockRow(item)}
-                          disabled={savingItemId === item._id}
-                        >
-                          {savingItemId === item._id ? 'Saving...' : 'Save'}
-                        </button>
+                        <div className='admin-row-actions'>
+                          <button className='admin-refresh-btn' type='button' onClick={() => toggleSoldStatus(item)} disabled={savingItemId === item._id}>
+                            {savingItemId === item._id ? 'Saving...' : item.soldOut ? 'Mark Available' : 'Mark Sold'}
+                          </button>
+                          <button className='admin-refresh-btn danger' type='button' onClick={() => removeItem(item)} disabled={savingItemId === item._id}>
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ) : (
                     <tr key={item._id}>
+                      <td>{item.name}</td>
+                      <td>{item.description || '-'}</td>
                       <td>
-                        <input
-                          type='text'
-                          value={item.name}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id ? { ...entry, name: event.target.value } : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
+                        <span className={`pill ${item.soldOut ? 'critical' : 'healthy'}`}>{item.soldOut ? 'Sold' : 'Available'}</span>
                       </td>
+                      <td>{naira.format(item.unitPrice || 0)}</td>
                       <td>
-                        <input
-                          type='number'
-                          min='0'
-                          value={item.stock}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id
-                                  ? { ...entry, stock: Number.parseInt(event.target.value, 10) || 0 }
-                                  : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type='number'
-                          min='0'
-                          value={item.unitPrice}
-                          onChange={(event) =>
-                            setStockItems((prev) =>
-                              prev.map((entry) =>
-                                entry._id === item._id
-                                  ? { ...entry, unitPrice: Number.parseInt(event.target.value, 10) || 0 }
-                                  : entry
-                              )
-                            )
-                          }
-                          disabled={savingItemId === item._id}
-                        />
-                      </td>
-                      <td>
-                        <button
-                          className='admin-refresh-btn'
-                          type='button'
-                          onClick={() => saveStockRow(item)}
-                          disabled={savingItemId === item._id}
-                        >
-                          {savingItemId === item._id ? 'Saving...' : 'Save'}
-                        </button>
+                        <div className='admin-row-actions'>
+                          <button className='admin-refresh-btn' type='button' onClick={() => toggleSoldStatus(item)} disabled={savingItemId === item._id}>
+                            {savingItemId === item._id ? 'Saving...' : item.soldOut ? 'Mark Available' : 'Mark Sold'}
+                          </button>
+                          <button className='admin-refresh-btn danger' type='button' onClick={() => removeItem(item)} disabled={savingItemId === item._id}>
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
                 ))}
                 {stockItemsByCategory.length === 0 && !stockLoading && (
                   <tr>
-                    <td colSpan={activePanel === 'vehicle' ? 7 : 4} className='empty-row'>
-                      No stock items yet for this category.
+                    <td colSpan={activePanel === 'vehicle' ? 8 : 5} className='empty-row'>
+                      No items yet for this category.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        {activePanel === 'car-tips' && (
+          <section className='admin-card'>
+            <h2>Car Tips Manager</h2>
+            <p className='inv-threshold'>Add and update tips shown on the landing page. One image per tip.</p>
+
+            <div className='admin-stock-actions'>
+              <button
+                className='admin-refresh-btn'
+                type='button'
+                onClick={() => setShowTipForm(true)}
+                disabled={savingTipId === 'new'}
+              >
+                Add Tip
+              </button>
+              <button className='admin-refresh-btn' type='button' onClick={loadCarTips} disabled={tipsLoading}>
+                {tipsLoading ? 'Refreshing...' : 'Refresh Tips'}
+              </button>
+            </div>
+
+            {tipsMessage && <p className='admin-success-text'>{tipsMessage}</p>}
+            {tipsError && <p className='admin-error-text'>{tipsError}</p>}
+
+            <table className='admin-table'>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Order</th>
+                  <th>Image</th>
+                  <th>Content</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {carTips.map((tip) => (
+                  <tr key={tip._id}>
+                    <td>
+                      <input
+                        type='text'
+                        value={tip.title}
+                        onChange={(event) =>
+                          setCarTips((prev) =>
+                            prev.map((entry) => (entry._id === tip._id ? { ...entry, title: event.target.value } : entry))
+                          )
+                        }
+                        disabled={savingTipId === tip._id}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type='text'
+                        value={tip.category}
+                        onChange={(event) =>
+                          setCarTips((prev) =>
+                            prev.map((entry) => (entry._id === tip._id ? { ...entry, category: event.target.value } : entry))
+                          )
+                        }
+                        disabled={savingTipId === tip._id}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type='number'
+                        min='1'
+                        value={tip.order}
+                        onChange={(event) =>
+                          setCarTips((prev) =>
+                            prev.map((entry) => (entry._id === tip._id ? { ...entry, order: event.target.value } : entry))
+                          )
+                        }
+                        disabled={savingTipId === tip._id}
+                      />
+                    </td>
+                    <td>
+                      <div className='admin-tip-image-cell'>
+                        {tip.imageUrl ? <img src={tip.imageUrl} alt={tip.title || 'Tip image'} /> : <span>No image</span>}
+                      </div>
+                    </td>
+                    <td>
+                      <textarea
+                        value={tip.body}
+                        onChange={(event) =>
+                          setCarTips((prev) =>
+                            prev.map((entry) => (entry._id === tip._id ? { ...entry, body: event.target.value } : entry))
+                          )
+                        }
+                        disabled={savingTipId === tip._id}
+                      />
+                    </td>
+                    <td>
+                      <div className='admin-row-actions'>
+                        <button className='admin-refresh-btn' type='button' onClick={() => saveCarTipRow(tip)} disabled={savingTipId === tip._id}>
+                          {savingTipId === tip._id ? 'Saving...' : 'Save'}
+                        </button>
+                        <button className='admin-refresh-btn danger' type='button' onClick={() => removeCarTip(tip)} disabled={savingTipId === tip._id}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {!tipsLoading && carTips.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className='empty-row'>
+                      No car tips yet.
                     </td>
                   </tr>
                 )}
@@ -907,6 +940,84 @@ export default function AdminDashboardPage() {
           </section>
         )}
       </main>
+      {showTipForm && activePanel === 'car-tips' && (
+        <div className='admin-modal-overlay' onClick={() => (savingTipId === 'new' ? null : setShowTipForm(false))}>
+          <div className='admin-modal-card' onClick={(event) => event.stopPropagation()}>
+            <div className='admin-modal-head'>
+              <h3>Add Car Tip</h3>
+              <button
+                type='button'
+                className='admin-modal-close'
+                onClick={() => setShowTipForm(false)}
+                disabled={savingTipId === 'new'}
+                aria-label='Close tip form'
+              >
+                <i className='fas fa-times' />
+              </button>
+            </div>
+            <p>Enter tip details and optional image.</p>
+            <div className='admin-basic-modal-form'>
+              <div className='admin-modal-field'>
+                <label>Title</label>
+                <input
+                  type='text'
+                  placeholder='Tip title'
+                  value={newTipTitle}
+                  onChange={(event) => setNewTipTitle(event.target.value)}
+                  disabled={savingTipId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Category</label>
+                <input
+                  type='text'
+                  placeholder='Category (e.g. Maintenance)'
+                  value={newTipCategory}
+                  onChange={(event) => setNewTipCategory(event.target.value)}
+                  disabled={savingTipId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Display Order</label>
+                <input
+                  type='number'
+                  min='1'
+                  placeholder='Display order'
+                  value={newTipOrder}
+                  onChange={(event) => setNewTipOrder(event.target.value)}
+                  disabled={savingTipId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Image</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => setNewTipImageFile(event.target.files?.[0] || null)}
+                  disabled={savingTipId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Content</label>
+                <textarea
+                  placeholder='Tip content'
+                  value={newTipBody}
+                  onChange={(event) => setNewTipBody(event.target.value)}
+                  disabled={savingTipId === 'new'}
+                />
+              </div>
+            </div>
+            <div className='admin-modal-actions'>
+              <button className='admin-refresh-btn' type='button' onClick={addCarTip} disabled={savingTipId === 'new'}>
+                {savingTipId === 'new' ? 'Adding...' : 'Add Tip'}
+              </button>
+              <button className='admin-refresh-btn' type='button' onClick={() => setShowTipForm(false)} disabled={savingTipId === 'new'}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showVehicleForm && activePanel === 'vehicle' && (
         <div className='admin-modal-overlay' onClick={() => (savingItemId === 'new' ? null : setShowVehicleForm(false))}>
           <div className='admin-modal-card' onClick={(event) => event.stopPropagation()}>
@@ -922,7 +1033,7 @@ export default function AdminDashboardPage() {
                 <i className='fas fa-times' />
               </button>
             </div>
-            <p>Enter vehicle details, stock level, and unit price.</p>
+            <p>Enter vehicle details and unit price.</p>
             <div className='admin-vehicle-modal-form'>
               <input
                 type='text'
@@ -988,6 +1099,34 @@ export default function AdminDashboardPage() {
                   disabled={savingItemId === 'new'}
                 />
               </div>
+              <div className='admin-modal-field'>
+                <label>Primary Image</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => setNewPrimaryImageFile(event.target.files?.[0] || null)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Feature Image</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => setNewFeatureImageFile(event.target.files?.[0] || null)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Other Images</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  multiple
+                  onChange={(event) => setNewOtherImageFiles(Array.from(event.target.files || []))}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
             </div>
             <div className='admin-modal-actions'>
               <button
@@ -1025,7 +1164,7 @@ export default function AdminDashboardPage() {
                 <i className='fas fa-times' />
               </button>
             </div>
-            <p>Enter car part details and stock information.</p>
+            <p>Enter car part details and unit price.</p>
             <div className='admin-basic-modal-form'>
               <div className='admin-modal-field'>
                 <label>Part Name</label>
@@ -1057,6 +1196,34 @@ export default function AdminDashboardPage() {
                   disabled={savingItemId === 'new'}
                 />
               </div>
+              <div className='admin-modal-field'>
+                <label>Primary Image</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => setNewPrimaryImageFile(event.target.files?.[0] || null)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Feature Image</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => setNewFeatureImageFile(event.target.files?.[0] || null)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Other Images</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  multiple
+                  onChange={(event) => setNewOtherImageFiles(Array.from(event.target.files || []))}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
             </div>
             <div className='admin-modal-actions'>
               <button className='admin-refresh-btn' type='button' onClick={addStockItem} disabled={savingItemId === 'new'}>
@@ -1084,7 +1251,7 @@ export default function AdminDashboardPage() {
                 <i className='fas fa-times' />
               </button>
             </div>
-            <p>Enter accessories details and stock information.</p>
+            <p>Enter accessories details and unit price.</p>
             <div className='admin-basic-modal-form'>
               <div className='admin-modal-field'>
                 <label>Accessory Name</label>
@@ -1113,6 +1280,34 @@ export default function AdminDashboardPage() {
                   placeholder='Unit Price (NGN)'
                   value={newItemUnitPrice}
                   onChange={(event) => setNewItemUnitPrice(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Primary Image</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => setNewPrimaryImageFile(event.target.files?.[0] || null)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Feature Image</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(event) => setNewFeatureImageFile(event.target.files?.[0] || null)}
+                  disabled={savingItemId === 'new'}
+                />
+              </div>
+              <div className='admin-modal-field'>
+                <label>Other Images</label>
+                <input
+                  type='file'
+                  accept='image/*'
+                  multiple
+                  onChange={(event) => setNewOtherImageFiles(Array.from(event.target.files || []))}
                   disabled={savingItemId === 'new'}
                 />
               </div>

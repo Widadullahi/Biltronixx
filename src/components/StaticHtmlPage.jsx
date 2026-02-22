@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { fetchCarTips, fetchStoreHighlights } from '../lib/sanityClient.js';
+import { fetchCarTips, fetchStockItems, fetchStoreHighlights } from '../lib/sanityClient.js';
 
 const FALLBACK_CAR_TIPS = [
   {
@@ -62,10 +62,55 @@ function extractPageParts(html) {
 
 export default function StaticHtmlPage({ htmlPath, pageType }) {
   const containerRef = useRef(null);
+  const installPromptRef = useRef(null);
   const [parts, setParts] = useState({ bodyHtml: '', styleText: '', title: 'Biltronix' });
   const [popup, setPopup] = useState({ open: false, title: '', message: '' });
+  const [installModal, setInstallModal] = useState({
+    open: false,
+    title: '',
+    message: '',
+    canInstall: false,
+  });
+  const [productModal, setProductModal] = useState({
+    open: false,
+    title: '',
+    category: '',
+    description: '',
+    price: '',
+    images: [],
+    index: 0,
+  });
 
   const styleTagId = useMemo(() => `page-style-${pageType}`, [pageType]);
+
+  const triggerInstallPrompt = async () => {
+    const deferredPrompt = installPromptRef.current;
+    if (!deferredPrompt) {
+      setInstallModal({ open: false, title: '', message: '', canInstall: false });
+      return;
+    }
+
+    try {
+      await deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice?.outcome === 'accepted') {
+        setPopup({
+          open: true,
+          title: 'Install Requested',
+          message: 'Installation has started. Follow any browser prompts to finish.',
+        });
+      } else {
+        setPopup({
+          open: true,
+          title: 'Install Cancelled',
+          message: 'You can install later from the Install App button.',
+        });
+      }
+    } finally {
+      installPromptRef.current = null;
+      setInstallModal({ open: false, title: '', message: '', canInstall: false });
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -126,6 +171,30 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       });
     });
   }, [parts.bodyHtml]);
+
+  useEffect(() => {
+    const onBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      installPromptRef.current = event;
+    };
+
+    const onAppInstalled = () => {
+      installPromptRef.current = null;
+      setPopup({
+        open: true,
+        title: 'App Installed',
+        message: 'Biltronix has been installed successfully on this device.',
+      });
+    };
+
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+    window.addEventListener('appinstalled', onAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', onAppInstalled);
+    };
+  }, []);
 
   useEffect(() => {
     const root = containerRef.current;
@@ -276,8 +345,27 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       if (detailsBtn) {
         event.preventDefault();
         event.stopPropagation();
-        const product = detailsBtn.getAttribute('data-product') || 'Selected product';
-        alert(`Product Details: ${product}\n\nIn a full implementation, this would open a detailed product page with specifications, photos, and more information.`);
+        const card = detailsBtn.closest('[data-product-card]');
+        if (!(card instanceof HTMLElement)) return;
+        const category = card.querySelector('.badge')?.textContent?.trim() || '';
+        const title = card.querySelector('h3')?.textContent?.trim() || 'Product';
+        const description = card.querySelector('p')?.textContent?.trim() || '';
+        const price = card.querySelector('.price')?.textContent?.trim() || '';
+        const primaryImage = card.querySelector('img')?.getAttribute('src') || '';
+        const extraImages = String(card.getAttribute('data-images') || '')
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean);
+        const images = Array.from(new Set([primaryImage, ...extraImages].filter(Boolean)));
+        setProductModal({
+          open: true,
+          title,
+          category,
+          description,
+          price,
+          images,
+          index: 0,
+        });
       }
 
       const filterBtn = target.closest('[data-filter]');
@@ -300,6 +388,63 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
           const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
           window.open(waUrl, '_blank', 'noopener,noreferrer');
         }
+      }
+
+      const installBtn = target.closest('[data-install-app]');
+      if (installBtn) {
+        event.preventDefault();
+        const deferredPrompt = installPromptRef.current;
+        const ua = navigator.userAgent || '';
+        const isIos = /iPhone|iPad|iPod/i.test(ua);
+        const isAndroid = /Android/i.test(ua);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+        if (isStandalone) {
+          setInstallModal({
+            open: true,
+            title: 'Already Installed',
+            message: 'This app is already installed on your device.',
+            canInstall: false,
+          });
+          return;
+        }
+
+        if (deferredPrompt) {
+          setInstallModal({
+            open: true,
+            title: 'Install Biltronix App',
+            message: 'Tap Install Now to add Biltronix to your device.',
+            canInstall: true,
+          });
+          return;
+        }
+
+        if (isIos) {
+          setInstallModal({
+            open: true,
+            title: 'Install on iPhone/iPad',
+            message: 'Tap Share in Safari, then choose Add to Home Screen.',
+            canInstall: false,
+          });
+          return;
+        }
+
+        if (isAndroid) {
+          setInstallModal({
+            open: true,
+            title: 'Install on Android',
+            message: 'Open browser menu and tap Install app or Add to Home screen.',
+            canInstall: false,
+          });
+          return;
+        }
+
+        setInstallModal({
+          open: true,
+          title: 'Install App',
+          message: 'In your browser menu, choose Install App or Create Shortcut to install Biltronix.',
+          canInstall: false,
+        });
       }
     };
 
@@ -355,6 +500,7 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
           .map(
             (tip) => `
               <article class="tip-card">
+                ${tip.imageUrl ? `<img src="${escapeHtml(tip.imageUrl)}" alt="${escapeHtml(tip.title || 'Car tip image')}" />` : ''}
                 <span class="tip-tag">${escapeHtml(tip.category || 'General')}</span>
                 <h3>${escapeHtml(tip.title || 'Untitled Tip')}</h3>
                 <p>${escapeHtml(tip.body || '')}</p>
@@ -368,6 +514,79 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       fetchCarTips(6)
         .then((tips) => renderTips(tips))
         .catch(() => renderTips(FALLBACK_CAR_TIPS));
+    }
+
+    const productsGrid = root.querySelector('.products-grid');
+    if (productsGrid instanceof HTMLElement) {
+      const categoryMap = {
+        vehicle: 'vehicle',
+        'car-parts': 'part',
+        accessories: 'accessory',
+      };
+
+      const toCurrency = (value) =>
+        new Intl.NumberFormat('en-NG', {
+          style: 'currency',
+          currency: 'NGN',
+          maximumFractionDigits: 0,
+        }).format(Number(value) || 0);
+
+      const toSafeCategoryLabel = (rawCategory) => {
+        if (rawCategory === 'vehicle') return 'Vehicle';
+        if (rawCategory === 'car-parts') return 'Car Part';
+        if (rawCategory === 'accessories') return 'Accessory';
+        return 'Item';
+      };
+
+      const renderStockItems = (items) => {
+        if (!Array.isArray(items) || items.length === 0) {
+          productsGrid.innerHTML = `
+            <article class="product-card">
+              <div class="product-body">
+                <h3>No Products Yet</h3>
+                <p>Products you add from the admin dashboard will appear here.</p>
+              </div>
+            </article>
+          `;
+          return;
+        }
+        const cardMarkup = items
+          .map((item) => {
+            const normalizedCategory = categoryMap[item.category] || 'part';
+            const allImages = [item.primaryImageUrl, item.featureImageUrl, ...(item.otherImageUrls || [])].filter(Boolean);
+            const imageSrc = allImages[0] || 'https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=1000&q=80';
+            const extraImages = allImages.slice(1).join(',');
+            const detailsLabel = item.category === 'car-parts' ? 'Details' : 'Details';
+            const soldBadge = item.soldOut ? '<span class="badge" style="margin-left:6px;background:#fde2e2;color:#8e1f1f;border-color:#f4c2ca;">Sold</span>' : '';
+            const detailsButton = `<a class="btn details view-details" href="#">${detailsLabel}</a>`;
+            const inquireButton = item.soldOut
+              ? ''
+              : `<a class="btn whatsapp" target="_blank" href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`I want to inquire about ${item.name}`)}">Inquire</a>`;
+            return `
+              <article class="product-card" data-product-card data-category="${normalizedCategory}" data-images="${escapeHtml(extraImages)}">
+                <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(item.name || 'Product image')}" />
+                <div class="product-body">
+                  <span class="badge">${escapeHtml(toSafeCategoryLabel(item.category))}</span>
+                  ${soldBadge}
+                  <h3>${escapeHtml(item.name || 'Untitled Item')}</h3>
+                  <p>${escapeHtml(item.description || 'No description available yet.')}</p>
+                  <div class="price">${escapeHtml(toCurrency(item.unitPrice))}</div>
+                  <div class="actions">${detailsButton}${inquireButton}</div>
+                </div>
+              </article>
+            `;
+          })
+          .join('');
+
+        productsGrid.innerHTML = cardMarkup;
+        applyStoreFilters();
+      };
+
+      fetchStockItems(300)
+        .then((items) => renderStockItems(items))
+        .catch(() => {
+          // keep existing static products when dynamic fetch fails
+        });
     }
 
     root.querySelectorAll('[data-auto-carousel]').forEach((carouselNode) => {
@@ -438,6 +657,103 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
             <button type='button' onClick={() => setPopup({ open: false, title: '', message: '' })}>
               OK
             </button>
+          </div>
+        </div>
+      )}
+      {installModal.open && (
+        <div className='site-popup-overlay' role='dialog' aria-modal='true' aria-labelledby='install-popup-title'>
+          <div className='site-popup-card'>
+            <h3 id='install-popup-title'>{installModal.title}</h3>
+            <p>{installModal.message}</p>
+            <div className='admin-row-actions'>
+              {installModal.canInstall && (
+                <button type='button' onClick={triggerInstallPrompt}>
+                  Install Now
+                </button>
+              )}
+              <button type='button' onClick={() => setInstallModal({ open: false, title: '', message: '', canInstall: false })}>
+                {installModal.canInstall ? 'Cancel' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {productModal.open && (
+        <div
+          className='store-detail-overlay'
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='store-detail-title'
+          onClick={() =>
+            setProductModal((prev) => ({
+              ...prev,
+              open: false,
+            }))
+          }
+        >
+          <div className='store-detail-card' onClick={(event) => event.stopPropagation()}>
+            <button
+              type='button'
+              className='store-detail-close'
+              onClick={() =>
+                setProductModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }))
+              }
+              aria-label='Close product details'
+            >
+              ×
+            </button>
+            <div className='store-detail-media'>
+              {productModal.images.length > 0 ? (
+                <>
+                  <img src={productModal.images[productModal.index] || ''} alt={productModal.title} />
+                  {productModal.images.length > 1 && (
+                    <div className='store-detail-controls'>
+                      <button
+                        type='button'
+                        onClick={() =>
+                          setProductModal((prev) => ({
+                            ...prev,
+                            index: prev.index === 0 ? prev.images.length - 1 : prev.index - 1,
+                          }))
+                        }
+                      >
+                        Prev
+                      </button>
+                      <span>
+                        {productModal.index + 1} / {productModal.images.length}
+                      </span>
+                      <button
+                        type='button'
+                        onClick={() =>
+                          setProductModal((prev) => ({
+                            ...prev,
+                            index: (prev.index + 1) % prev.images.length,
+                          }))
+                        }
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className='store-detail-noimage'>No image available</div>
+              )}
+            </div>
+            <div className='store-detail-content'>
+              <span className='store-detail-badge'>{productModal.category || 'Item'}</span>
+              <h3 id='store-detail-title'>{productModal.title}</h3>
+              <p>{productModal.description}</p>
+              <p className='store-detail-price'>{productModal.price}</p>
+              <ul className='store-detail-list'>
+                <li>Quality checked by Biltronix team</li>
+                <li>WhatsApp inquiry available for fast response</li>
+                <li>Support available for fitment guidance</li>
+              </ul>
+            </div>
           </div>
         </div>
       )}
