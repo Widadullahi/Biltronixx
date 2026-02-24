@@ -41,7 +41,6 @@ const TIP_CATEGORIES = ['General', 'Maintenance', 'Safety', 'Engine Care', 'Perf
 
 const ADMIN_LOGIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
 const ADMIN_LOGIN_PASSWORD = String(import.meta.env.VITE_ADMIN_PASSWORD || '');
-const ADMIN_SESSION_KEY = 'biltronix_admin_authenticated';
 
 const naira = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -51,7 +50,7 @@ const naira = new Intl.NumberFormat('en-NG', {
 
 export default function AdminDashboardPage() {
   const [activePanel, setActivePanel] = useState('overview');
-  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -507,7 +506,6 @@ export default function AdminDashboardPage() {
     }
 
     if (normalizedEmail === ADMIN_LOGIN_EMAIL && loginPassword === ADMIN_LOGIN_PASSWORD) {
-      sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
       setIsAuthenticated(true);
       setLoginError('');
       setLoginPassword('');
@@ -518,7 +516,6 @@ export default function AdminDashboardPage() {
   };
 
   const handleAdminLogout = () => {
-    sessionStorage.removeItem(ADMIN_SESSION_KEY);
     setIsAuthenticated(false);
     setLoginEmail('');
     setLoginPassword('');
