@@ -9,11 +9,8 @@ import {
   loginInspectorAccount,
   updateInspectorAccount,
 } from '../lib/sanityClient.js';
+import { OTHER_OPTION, VEHICLE_MAKES, VEHICLE_MODELS_BY_MAKE } from '../lib/vehicleOptions.js';
 import './InspectionPortalPage.css';
-
-const ACCOUNT_KEY = 'biltronix_inspection_account';
-const ACCOUNTS_KEY = 'biltronix_inspection_accounts';
-const REPORTS_KEY = 'biltronix_inspection_reports';
 
 const CHECK_SECTIONS = [
   { title: 'Exterior Inspection', items: ['Body Condition', 'Headlights', 'Glass & Mirrors', 'Tires', 'License Plates'] },
@@ -50,87 +47,6 @@ function readFileAsDataUrl(file) {
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-}
-
-function generateId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-}
-
-function saveAccountLocal(account) {
-  localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
-}
-
-function getAccountLocal() {
-  const raw = localStorage.getItem(ACCOUNT_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function clearAccountLocal() {
-  localStorage.removeItem(ACCOUNT_KEY);
-}
-
-function getAccountsLocal() {
-  const raw = localStorage.getItem(ACCOUNTS_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-function upsertAccountLocal(accountWithPassword) {
-  const accounts = getAccountsLocal();
-  const next = [accountWithPassword, ...accounts.filter((item) => item.email !== accountWithPassword.email)];
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(next));
-}
-
-function updateAccountProfileLocal(oldEmail, nextAccount) {
-  const accounts = getAccountsLocal();
-  const oldEmailLower = String(oldEmail || '').toLowerCase();
-  let matched = false;
-
-  const updated = accounts.map((item) => {
-    if (String(item.email || '').toLowerCase() !== oldEmailLower) return item;
-    matched = true;
-    return {
-      ...item,
-      fullName: nextAccount.fullName,
-      email: nextAccount.email,
-      phone: nextAccount.phone,
-      companyName: nextAccount.companyName,
-      companyAddress: nextAccount.companyAddress,
-      signatureDataUrl: nextAccount.signatureDataUrl,
-      companyLogoDataUrl: nextAccount.companyLogoDataUrl,
-    };
-  });
-
-  if (!matched) {
-    updated.unshift(nextAccount);
-  }
-
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(updated));
-}
-
-function getReportsLocal() {
-  const raw = localStorage.getItem(REPORTS_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return [];
-  }
-}
-
-function saveReportLocal(report) {
-  const current = getReportsLocal();
-  current.unshift(report);
-  localStorage.setItem(REPORTS_KEY, JSON.stringify(current));
 }
 
 function imageFormat(dataUrl) {
@@ -278,7 +194,7 @@ function createReportPdf(report, account) {
 }
 
 export default function InspectionPortalPage() {
-  const [account, setAccount] = useState(() => getAccountLocal());
+  const [account, setAccount] = useState(null);
   const [authMode, setAuthMode] = useState('register');
   const [activeTab, setActiveTab] = useState('new');
   const [reports, setReports] = useState([]);
@@ -325,6 +241,8 @@ export default function InspectionPortalPage() {
     checklist: defaultChecklist(),
     images: [],
   });
+  const [customInspectionMake, setCustomInspectionMake] = useState('');
+  const [customInspectionModel, setCustomInspectionModel] = useState('');
 
   const groupedChecklist = useMemo(
     () =>
@@ -334,6 +252,10 @@ export default function InspectionPortalPage() {
       })),
     [inspection.checklist]
   );
+  const inspectionModelOptions = useMemo(() => {
+    if (!inspection.vehicleMake || inspection.vehicleMake === OTHER_OPTION) return [];
+    return VEHICLE_MODELS_BY_MAKE[inspection.vehicleMake] || [];
+  }, [inspection.vehicleMake]);
 
   const inspectionCount = reports.length;
 
@@ -343,10 +265,9 @@ export default function InspectionPortalPage() {
     try {
       const remote = await fetchInspectionReportsByAccount(accountId);
       setReports(remote);
-      localStorage.setItem(REPORTS_KEY, JSON.stringify(remote));
-    } catch {
-      const local = getReportsLocal().filter((report) => report.accountId === accountId);
-      setReports(local);
+    } catch (loadError) {
+      setReports([]);
+      setError(loadError instanceof Error ? loadError.message : 'Could not load inspection reports from Sanity.');
     } finally {
       setLoadingReports(false);
     }
@@ -385,32 +306,14 @@ export default function InspectionPortalPage() {
       return;
     }
 
-    const payload = {
-      ...registration,
-      _id: generateId('acct'),
-    };
+    const payload = { ...registration };
 
     try {
       const created = await createInspectorAccount(payload);
       setAccount(created);
-      saveAccountLocal(created);
-      upsertAccountLocal({ ...created, password: registration.password });
       setMessage('Account created. You can now create inspections.');
-    } catch {
-      const localAccount = {
-        _id: payload._id,
-        fullName: payload.fullName,
-        email: payload.email,
-        phone: payload.phone,
-        companyName: payload.companyName,
-        companyAddress: payload.companyAddress,
-        signatureDataUrl: payload.signatureDataUrl,
-        companyLogoDataUrl: payload.companyLogoDataUrl,
-      };
-      setAccount(localAccount);
-      saveAccountLocal(localAccount);
-      upsertAccountLocal({ ...localAccount, password: registration.password });
-      setMessage('Account created locally. Add write token later to sync to Sanity.');
+    } catch (createError) {
+      setError(createError instanceof Error ? createError.message : 'Could not create account in Sanity.');
     }
   };
 
@@ -422,35 +325,10 @@ export default function InspectionPortalPage() {
     try {
       const loggedIn = await loginInspectorAccount(loginData.email.trim(), loginData.password);
       setAccount(loggedIn);
-      saveAccountLocal(loggedIn);
       setMessage('Logged in successfully.');
       return;
-    } catch {
-      const accounts = getAccountsLocal();
-      const local = accounts.find(
-        (item) =>
-          String(item.email || '').toLowerCase() === loginData.email.trim().toLowerCase() &&
-          item.password === loginData.password
-      );
-
-      if (local) {
-        const localAccount = {
-          _id: local._id,
-          fullName: local.fullName,
-          email: local.email,
-          phone: local.phone,
-          companyName: local.companyName,
-          companyAddress: local.companyAddress,
-          signatureDataUrl: local.signatureDataUrl,
-          companyLogoDataUrl: local.companyLogoDataUrl,
-        };
-        setAccount(localAccount);
-        saveAccountLocal(localAccount);
-        setMessage('Logged in from local account data.');
-        return;
-      }
-
-      setError('Invalid email or password.');
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : 'Invalid email or password.');
     }
   };
 
@@ -484,20 +362,12 @@ export default function InspectionPortalPage() {
     setSavingSettings(true);
     setMessage('');
     setError('');
-    const oldEmail = account.email;
-
     try {
       const updated = await updateInspectorAccount(account._id, settings);
       setAccount(updated);
-      saveAccountLocal(updated);
-      updateAccountProfileLocal(oldEmail, updated);
       setMessage('Settings updated successfully.');
-    } catch {
-      const localUpdated = { ...account, ...settings };
-      setAccount(localUpdated);
-      saveAccountLocal(localUpdated);
-      updateAccountProfileLocal(oldEmail, localUpdated);
-      setMessage('Settings updated locally.');
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Could not update settings in Sanity.');
     } finally {
       setSavingSettings(false);
     }
@@ -528,6 +398,16 @@ export default function InspectionPortalPage() {
     setMessage('');
     setError('');
 
+    const resolvedInspectionMake =
+      inspection.vehicleMake === OTHER_OPTION ? customInspectionMake.trim() : inspection.vehicleMake.trim();
+    const resolvedInspectionModel =
+      inspection.vehicleModel === OTHER_OPTION ? customInspectionModel.trim() : inspection.vehicleModel.trim();
+
+    if (!resolvedInspectionMake || !resolvedInspectionModel) {
+      setError('Vehicle make and model are required.');
+      return;
+    }
+
     const vinValue = String(inspection.vin || '').trim().toUpperCase();
     const regValue = normalizeRegNumber(inspection.regNo);
 
@@ -542,11 +422,10 @@ export default function InspectionPortalPage() {
     }
 
     const report = {
-      _id: generateId('report'),
       accountId: account._id,
       companyName: account.companyName,
       inspectorName: account.fullName,
-      vehicleLabel: `${inspection.year} ${inspection.vehicleMake} ${inspection.vehicleModel}`.trim(),
+      vehicleLabel: `${inspection.year} ${resolvedInspectionMake} ${resolvedInspectionModel}`.trim(),
       vehicleRegNo: regValue,
       vin: vinValue,
       mileage: inspection.mileage,
@@ -562,16 +441,11 @@ export default function InspectionPortalPage() {
     try {
       const saved = await createInspectionReport(report);
       setReports((prev) => [saved, ...prev]);
-      saveReportLocal(saved);
       createReportPdf(saved, account);
       setMessage('Inspection saved and PDF downloaded.');
       setError('');
-    } catch {
-      setReports((prev) => [report, ...prev]);
-      saveReportLocal(report);
-      createReportPdf(report, account);
-      setMessage('Inspection saved locally and PDF downloaded.');
-      setError('');
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Could not save inspection report to Sanity.');
     }
 
     setInspection({
@@ -589,13 +463,14 @@ export default function InspectionPortalPage() {
       checklist: defaultChecklist(),
       images: [],
     });
+    setCustomInspectionMake('');
+    setCustomInspectionModel('');
     setActiveTab('records');
   };
 
   const logout = () => {
     setAccount(null);
     setReports([]);
-    clearAccountLocal();
     setMessage('');
     setError('');
   };
@@ -734,8 +609,56 @@ export default function InspectionPortalPage() {
               <form className='inspection-form' onSubmit={submitInspection}>
                 <h3>Vehicle Information</h3>
                 <div className='grid-2'>
-                  <input required placeholder='Vehicle Make' value={inspection.vehicleMake} onChange={(e) => setInspection((p) => ({ ...p, vehicleMake: e.target.value }))} />
-                  <input required placeholder='Vehicle Model' value={inspection.vehicleModel} onChange={(e) => setInspection((p) => ({ ...p, vehicleModel: e.target.value }))} />
+                  <select
+                    required
+                    value={inspection.vehicleMake}
+                    onChange={(e) => {
+                      setInspection((p) => ({ ...p, vehicleMake: e.target.value, vehicleModel: '' }));
+                      setCustomInspectionMake('');
+                      setCustomInspectionModel('');
+                    }}
+                  >
+                    <option value='' disabled>Vehicle Make</option>
+                    {VEHICLE_MAKES.map((make) => (
+                      <option key={make} value={make}>
+                        {make}
+                      </option>
+                    ))}
+                    <option value={OTHER_OPTION}>Other</option>
+                  </select>
+                  {inspection.vehicleMake === OTHER_OPTION && (
+                    <input
+                      required
+                      placeholder='Enter Vehicle Make'
+                      value={customInspectionMake}
+                      onChange={(e) => setCustomInspectionMake(e.target.value)}
+                    />
+                  )}
+                  <select
+                    required
+                    value={inspection.vehicleModel}
+                    onChange={(e) => {
+                      setInspection((p) => ({ ...p, vehicleModel: e.target.value }));
+                      setCustomInspectionModel('');
+                    }}
+                    disabled={!inspection.vehicleMake || inspection.vehicleMake === OTHER_OPTION}
+                  >
+                    <option value='' disabled>{inspection.vehicleMake ? 'Vehicle Model' : 'Select Make First'}</option>
+                    {inspectionModelOptions.map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
+                    {inspection.vehicleMake && inspection.vehicleMake !== OTHER_OPTION && <option value={OTHER_OPTION}>Other</option>}
+                  </select>
+                  {(inspection.vehicleMake === OTHER_OPTION || inspection.vehicleModel === OTHER_OPTION) && (
+                    <input
+                      required
+                      placeholder='Enter Vehicle Model'
+                      value={customInspectionModel}
+                      onChange={(e) => setCustomInspectionModel(e.target.value)}
+                    />
+                  )}
                   <input required type='number' placeholder='Year' value={inspection.year} onChange={(e) => setInspection((p) => ({ ...p, year: e.target.value }))} />
                   <input placeholder='Color' value={inspection.color} onChange={(e) => setInspection((p) => ({ ...p, color: e.target.value }))} />
                   <input

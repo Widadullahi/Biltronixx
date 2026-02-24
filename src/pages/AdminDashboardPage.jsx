@@ -11,6 +11,7 @@ import {
   setStockItemSoldStatus,
   updateCarTip,
 } from '../lib/sanityClient.js';
+import { OTHER_OPTION, VEHICLE_MAKES, VEHICLE_MODELS_BY_MAKE } from '../lib/vehicleOptions.js';
 import './AdminDashboardPage.css';
 
 function toSlug(input) {
@@ -38,6 +39,10 @@ const VEHICLE_TRANSMISSIONS = ['Automatic', 'Manual'];
 const VEHICLE_FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TIP_CATEGORIES = ['General', 'Maintenance', 'Safety', 'Engine Care', 'Performance', 'Buying Guide'];
 
+const ADMIN_LOGIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || 'biltronixtech@gmail.com').trim().toLowerCase();
+const ADMIN_LOGIN_PASSWORD = String(import.meta.env.VITE_ADMIN_PASSWORD || 'password');
+const ADMIN_SESSION_KEY = 'biltronix_admin_authenticated';
+
 const naira = new Intl.NumberFormat('en-NG', {
   style: 'currency',
   currency: 'NGN',
@@ -46,6 +51,10 @@ const naira = new Intl.NumberFormat('en-NG', {
 
 export default function AdminDashboardPage() {
   const [activePanel, setActivePanel] = useState('overview');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bookingStatus, setBookingStatus] = useState('all');
   const [bookingQuery, setBookingQuery] = useState('');
@@ -76,6 +85,8 @@ export default function AdminDashboardPage() {
   const [newOtherImageFiles, setNewOtherImageFiles] = useState([]);
   const [newVehicleMake, setNewVehicleMake] = useState('');
   const [newVehicleModel, setNewVehicleModel] = useState('');
+  const [customNewVehicleMake, setCustomNewVehicleMake] = useState('');
+  const [customNewVehicleModel, setCustomNewVehicleModel] = useState('');
   const [newVehicleDescription, setNewVehicleDescription] = useState('');
   const [newVehicleYear, setNewVehicleYear] = useState(String(new Date().getFullYear()));
   const [newVehicleCondition, setNewVehicleCondition] = useState(VEHICLE_CONDITIONS[0]);
@@ -111,8 +122,9 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     loadDashboardData();
-  }, []);
+  }, [isAuthenticated]);
 
   const loadStockItems = async () => {
     setStockLoading(true);
@@ -130,8 +142,9 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     loadStockItems();
-  }, []);
+  }, [isAuthenticated]);
 
   const loadCarTips = async () => {
     setTipsLoading(true);
@@ -148,8 +161,9 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     loadCarTips();
-  }, []);
+  }, [isAuthenticated]);
 
   const bookings = dashboardData.bookings;
   const orders = dashboardData.orders;
@@ -240,6 +254,10 @@ export default function AdminDashboardPage() {
     const nigerianUsedCount = vehicles.filter((item) => item.condition === 'Nigerian Used').length;
     return { totalVehicles: vehicles.length, newCount, foreignUsedCount, nigerianUsedCount };
   }, [stockItems]);
+  const adminVehicleModelOptions = useMemo(() => {
+    if (!newVehicleMake || newVehicleMake === OTHER_OPTION) return [];
+    return VEHICLE_MODELS_BY_MAKE[newVehicleMake] || [];
+  }, [newVehicleMake]);
 
   const addStockItem = async () => {
     if (!activeStockCategory) return;
@@ -255,10 +273,13 @@ export default function AdminDashboardPage() {
 
       let payload;
       if (activeStockCategory === 'vehicle') {
-        if (!newVehicleMake.trim() || !newVehicleModel.trim()) {
+        const resolvedVehicleMake = newVehicleMake === OTHER_OPTION ? customNewVehicleMake.trim() : newVehicleMake.trim();
+        const resolvedVehicleModel = newVehicleModel === OTHER_OPTION ? customNewVehicleModel.trim() : newVehicleModel.trim();
+
+        if (!resolvedVehicleMake || !resolvedVehicleModel) {
           throw new Error('Vehicle make and model are required.');
         }
-        const vehicleName = `${newVehicleYear} ${newVehicleMake.trim()} ${newVehicleModel.trim()}`.trim();
+        const vehicleName = `${newVehicleYear} ${resolvedVehicleMake} ${resolvedVehicleModel}`.trim();
         payload = {
           name: vehicleName,
           description: newVehicleDescription.trim(),
@@ -267,8 +288,8 @@ export default function AdminDashboardPage() {
           soldOut: false,
           category: activeStockCategory,
           unitPrice: newItemUnitPrice,
-          make: newVehicleMake.trim(),
-          model: newVehicleModel.trim(),
+          make: resolvedVehicleMake,
+          model: resolvedVehicleModel,
           year: newVehicleYear,
           condition: newVehicleCondition,
           transmission: newVehicleTransmission,
@@ -300,6 +321,8 @@ export default function AdminDashboardPage() {
       setNewOtherImageFiles([]);
       setNewVehicleMake('');
       setNewVehicleModel('');
+      setCustomNewVehicleMake('');
+      setCustomNewVehicleModel('');
       setNewVehicleDescription('');
       setNewVehicleYear(String(new Date().getFullYear()));
       setNewVehicleCondition(VEHICLE_CONDITIONS[0]);
@@ -474,6 +497,29 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleAdminLogin = (event) => {
+    event.preventDefault();
+    const normalizedEmail = loginEmail.trim().toLowerCase();
+
+    if (normalizedEmail === ADMIN_LOGIN_EMAIL && loginPassword === ADMIN_LOGIN_PASSWORD) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+      setIsAuthenticated(true);
+      setLoginError('');
+      setLoginPassword('');
+      return;
+    }
+
+    setLoginError('Invalid admin email or password.');
+  };
+
+  const handleAdminLogout = () => {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    setIsAuthenticated(false);
+    setLoginEmail('');
+    setLoginPassword('');
+    setLoginError('');
+  };
+
   const handlePanelChange = (panel) => {
     setActivePanel(panel);
     if (panel !== 'vehicle') setShowVehicleForm(false);
@@ -484,6 +530,43 @@ export default function AdminDashboardPage() {
       setSidebarOpen(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <main className='admin-main' style={{ maxWidth: 420, margin: '8vh auto', padding: '0 16px' }}>
+        <section className='admin-card'>
+          <h2>Admin Login</h2>
+          <p>Use your admin email and password to access the dashboard.</p>
+          <form className='admin-basic-modal-form' onSubmit={handleAdminLogin}>
+            <div className='admin-modal-field'>
+              <label htmlFor='admin-email'>Email</label>
+              <input
+                id='admin-email'
+                type='email'
+                value={loginEmail}
+                onChange={(event) => setLoginEmail(event.target.value)}
+                placeholder='Enter admin email'
+                required
+              />
+            </div>
+            <div className='admin-modal-field'>
+              <label htmlFor='admin-password'>Password</label>
+              <input
+                id='admin-password'
+                type='password'
+                value={loginPassword}
+                onChange={(event) => setLoginPassword(event.target.value)}
+                placeholder='Enter admin password'
+                required
+              />
+            </div>
+            {loginError && <p className='admin-error-text'>{loginError}</p>}
+            <button className='admin-refresh-btn' type='submit'>Login</button>
+          </form>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <div className='admin-shell'>
@@ -542,6 +625,9 @@ export default function AdminDashboardPage() {
               <i className='fas fa-bars' />
             </button>
             <h1>Operations Dashboard</h1>
+            <button className='admin-refresh-btn' type='button' onClick={handleAdminLogout}>
+              Logout
+            </button>
           </div>
           <p>Track bookings, orders, and item listings from one place.</p>
           {error && <p className='admin-error-text'>{error}</p>}
@@ -1053,20 +1139,58 @@ export default function AdminDashboardPage() {
             </div>
             <p>Enter vehicle details and unit price.</p>
             <div className='admin-vehicle-modal-form'>
-              <input
-                type='text'
-                placeholder='Make (e.g. Toyota)'
+              <select
                 value={newVehicleMake}
-                onChange={(event) => setNewVehicleMake(event.target.value)}
+                onChange={(event) => {
+                  setNewVehicleMake(event.target.value);
+                  setNewVehicleModel('');
+                  setCustomNewVehicleMake('');
+                  setCustomNewVehicleModel('');
+                }}
                 disabled={savingItemId === 'new'}
-              />
-              <input
-                type='text'
-                placeholder='Model (e.g. Camry)'
+              >
+                <option value=''>Select Make</option>
+                {VEHICLE_MAKES.map((make) => (
+                  <option key={make} value={make}>
+                    {make}
+                  </option>
+                ))}
+                <option value={OTHER_OPTION}>Other</option>
+              </select>
+              {newVehicleMake === OTHER_OPTION && (
+                <input
+                  type='text'
+                  placeholder='Enter Vehicle Make'
+                  value={customNewVehicleMake}
+                  onChange={(event) => setCustomNewVehicleMake(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              )}
+              <select
                 value={newVehicleModel}
-                onChange={(event) => setNewVehicleModel(event.target.value)}
-                disabled={savingItemId === 'new'}
-              />
+                onChange={(event) => {
+                  setNewVehicleModel(event.target.value);
+                  setCustomNewVehicleModel('');
+                }}
+                disabled={savingItemId === 'new' || !newVehicleMake || newVehicleMake === OTHER_OPTION}
+              >
+                <option value=''>{newVehicleMake ? 'Select Model' : 'Select Make First'}</option>
+                {adminVehicleModelOptions.map((model) => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+                {newVehicleMake && newVehicleMake !== OTHER_OPTION && <option value={OTHER_OPTION}>Other</option>}
+              </select>
+              {(newVehicleMake === OTHER_OPTION || newVehicleModel === OTHER_OPTION) && (
+                <input
+                  type='text'
+                  placeholder='Enter Vehicle Model'
+                  value={customNewVehicleModel}
+                  onChange={(event) => setCustomNewVehicleModel(event.target.value)}
+                  disabled={savingItemId === 'new'}
+                />
+              )}
               <input
                 type='number'
                 min='1990'
