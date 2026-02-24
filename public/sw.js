@@ -1,5 +1,12 @@
-const APP_CACHE = 'biltronix-cache-v2';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/logo.jpg'];
+const APP_CACHE = 'biltronix-cache-v4';
+const APP_SHELL = [
+  '/',
+  '/index.html',
+  '/manifest.webmanifest',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/apple-touch-icon.png',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(APP_CACHE).then((cache) => cache.addAll(APP_SHELL)));
@@ -26,11 +33,7 @@ self.addEventListener('fetch', (event) => {
   if (isHtmlRequest) {
     event.respondWith(
       fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(APP_CACHE).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
+        .then((response) => response)
         .catch(() => caches.match(event.request).then((cached) => cached || caches.match('/index.html')))
     );
     return;

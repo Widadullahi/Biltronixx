@@ -180,7 +180,7 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
     let cancelled = false;
 
     async function loadPage() {
-      const response = await fetch(htmlPath);
+      const response = await fetch(htmlPath, { cache: 'no-store' });
       const html = await response.text();
       const extracted = extractPageParts(html);
       if (!cancelled) {
