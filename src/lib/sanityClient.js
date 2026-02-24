@@ -279,13 +279,9 @@ async function uploadImageFile(file) {
   const asset = await sanityWriteClient.assets.upload('image', file, {
     filename: file.name || `image-${Date.now()}.jpg`,
   });
+  if (asset?.url) return asset.url;
   if (!asset?._ref) return '';
-  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${asset._ref
-    .replace('image-', '')
-    .replace('-jpg', '.jpg')
-    .replace('-jpeg', '.jpeg')
-    .replace('-png', '.png')
-    .replace('-webp', '.webp')}`;
+  return `https://cdn.sanity.io/images/${projectId}/${dataset}/${asset._ref.replace('image-', '').replace(/-(jpg|jpeg|png|webp)$/i, '.$1')}`;
 }
 
 async function uploadImageFiles(files) {

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { fetchCarTips } from '../lib/sanityClient.js';
 import './CarTipsPage.css';
 
+const TIP_PREVIEW_WORD_LIMIT = 24;
+
 const FALLBACK_CAR_TIPS = [
   {
     title: 'Check Tire Pressure Weekly',
@@ -36,11 +38,27 @@ const FALLBACK_CAR_TIPS = [
   },
 ];
 
+function trimWords(input, limit = TIP_PREVIEW_WORD_LIMIT) {
+  const words = String(input || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length <= limit) return String(input || '').trim();
+  return `${words.slice(0, limit).join(' ')}...`;
+}
+
 export default function CarTipsPage() {
   const [tips, setTips] = useState([]);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
+  const [tipModal, setTipModal] = useState({
+    open: false,
+    title: '',
+    category: '',
+    body: '',
+    imageUrl: '',
+  });
 
   useEffect(() => {
     let active = true;
@@ -144,12 +162,66 @@ export default function CarTipsPage() {
                 {tip.imageUrl ? <img src={tip.imageUrl} alt={tip.title || 'Car tip'} /> : null}
                 <span className='tips-chip'>{tip.category || 'General'}</span>
                 <h2>{tip.title || 'Untitled Tip'}</h2>
-                <p>{tip.body || ''}</p>
+                <p>{trimWords(tip.body || '', TIP_PREVIEW_WORD_LIMIT)}</p>
+                <button
+                  type='button'
+                  className='tip-see-more'
+                  onClick={() =>
+                    setTipModal({
+                      open: true,
+                      title: tip.title || 'Untitled Tip',
+                      category: tip.category || 'General',
+                      body: tip.body || '',
+                      imageUrl: tip.imageUrl || '',
+                    })
+                  }
+                >
+                  View More
+                </button>
               </article>
             ))}
           </div>
         )}
       </main>
+
+      {tipModal.open && (
+        <div
+          className='tip-detail-overlay'
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='car-tip-detail-title'
+          onClick={() =>
+            setTipModal((prev) => ({
+              ...prev,
+              open: false,
+            }))
+          }
+        >
+          <div className='tip-detail-card' onClick={(event) => event.stopPropagation()}>
+            <button
+              type='button'
+              className='tip-detail-close'
+              onClick={() =>
+                setTipModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }))
+              }
+              aria-label='Close tip details'
+            >
+              x
+            </button>
+            {tipModal.imageUrl ? (
+              <img src={tipModal.imageUrl} alt={tipModal.title || 'Car tip'} />
+            ) : (
+              <div className='tip-detail-noimage'>No image available</div>
+            )}
+            <span className='tip-detail-badge'>{tipModal.category || 'General'}</span>
+            <h3 id='car-tip-detail-title'>{tipModal.title}</h3>
+            <p>{tipModal.body}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

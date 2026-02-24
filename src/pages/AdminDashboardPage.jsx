@@ -36,6 +36,7 @@ const STOCK_CATEGORIES = [
 const VEHICLE_CONDITIONS = ['New', 'Foreign Used', 'Nigerian Used'];
 const VEHICLE_TRANSMISSIONS = ['Automatic', 'Manual'];
 const VEHICLE_FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
+const TIP_CATEGORIES = ['General', 'Maintenance', 'Safety', 'Engine Care', 'Performance', 'Buying Guide'];
 
 const naira = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -66,13 +67,12 @@ export default function AdminDashboardPage() {
   const [newTipTitle, setNewTipTitle] = useState('');
   const [newTipBody, setNewTipBody] = useState('');
   const [newTipCategory, setNewTipCategory] = useState('General');
-  const [newTipOrder, setNewTipOrder] = useState('1');
   const [newTipImageFile, setNewTipImageFile] = useState(null);
+  const [editingTipId, setEditingTipId] = useState('');
   const [newItemName, setNewItemName] = useState('');
   const [newItemDescription, setNewItemDescription] = useState('');
   const [newItemUnitPrice, setNewItemUnitPrice] = useState('');
   const [newPrimaryImageFile, setNewPrimaryImageFile] = useState(null);
-  const [newFeatureImageFile, setNewFeatureImageFile] = useState(null);
   const [newOtherImageFiles, setNewOtherImageFiles] = useState([]);
   const [newVehicleMake, setNewVehicleMake] = useState('');
   const [newVehicleModel, setNewVehicleModel] = useState('');
@@ -85,6 +85,13 @@ export default function AdminDashboardPage() {
   const [showCarPartForm, setShowCarPartForm] = useState(false);
   const [showAccessoriesForm, setShowAccessoriesForm] = useState(false);
   const [showTipForm, setShowTipForm] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    open: false,
+    type: '',
+    id: '',
+    label: '',
+    processing: false,
+  });
 
   const todayIso = useMemo(() => new Date().toISOString().split('T')[0], []);
 
@@ -224,6 +231,7 @@ export default function AdminDashboardPage() {
   const activeStockMeta = useMemo(() => {
     return STOCK_CATEGORIES.find((item) => item.panel === activePanel) || null;
   }, [activePanel]);
+  const isTipSaving = savingTipId === 'new' || (Boolean(editingTipId) && savingTipId === editingTipId);
 
   const vehicleStats = useMemo(() => {
     const vehicles = stockItems.filter((item) => item.category === 'vehicle');
@@ -240,6 +248,11 @@ export default function AdminDashboardPage() {
     setStockMessage('');
     setSavingItemId('new');
     try {
+      const hasAnyImage = Boolean(newPrimaryImageFile || (Array.isArray(newOtherImageFiles) && newOtherImageFiles.length > 0));
+      if (!hasAnyImage) {
+        throw new Error('Please upload at least one image (Primary or Other Images).');
+      }
+
       let payload;
       if (activeStockCategory === 'vehicle') {
         if (!newVehicleMake.trim() || !newVehicleModel.trim()) {
@@ -250,7 +263,6 @@ export default function AdminDashboardPage() {
           name: vehicleName,
           description: newVehicleDescription.trim(),
           primaryImageFile: newPrimaryImageFile,
-          featureImageFile: newFeatureImageFile,
           otherImageFiles: newOtherImageFiles,
           soldOut: false,
           category: activeStockCategory,
@@ -270,7 +282,6 @@ export default function AdminDashboardPage() {
           name: newItemName.trim(),
           description: newItemDescription.trim(),
           primaryImageFile: newPrimaryImageFile,
-          featureImageFile: newFeatureImageFile,
           otherImageFiles: newOtherImageFiles,
           soldOut: false,
           category: activeStockCategory,
@@ -286,7 +297,6 @@ export default function AdminDashboardPage() {
       setNewItemDescription('');
       setNewItemUnitPrice('');
       setNewPrimaryImageFile(null);
-      setNewFeatureImageFile(null);
       setNewOtherImageFiles([]);
       setNewVehicleMake('');
       setNewVehicleModel('');
@@ -327,16 +337,14 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const removeItem = async (item) => {
-    const okay = window.confirm(`Delete "${item.name}"? This action cannot be undone.`);
-    if (!okay) return;
+  const removeItem = async (itemId, itemName) => {
     setStockError('');
     setStockMessage('');
-    setSavingItemId(item._id);
+    setSavingItemId(itemId);
     try {
-      await deleteStockItem(item._id);
-      setStockItems((prev) => prev.filter((entry) => entry._id !== item._id));
-      setStockMessage(`${item.name} deleted.`);
+      await deleteStockItem(itemId);
+      setStockItems((prev) => prev.filter((entry) => entry._id !== itemId));
+      setStockMessage(`${itemName} deleted.`);
     } catch (deleteError) {
       setStockError(deleteError instanceof Error ? deleteError.message : 'Could not delete item.');
     } finally {
@@ -358,14 +366,12 @@ export default function AdminDashboardPage() {
         title: newTipTitle.trim(),
         body: newTipBody.trim(),
         category: newTipCategory.trim() || 'General',
-        order: newTipOrder,
         imageFile: newTipImageFile,
       });
-      setCarTips((prev) => [...prev, created].sort((a, b) => (a.order || 999) - (b.order || 999)));
+      setCarTips((prev) => [...prev, created].sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''))));
       setNewTipTitle('');
       setNewTipBody('');
       setNewTipCategory('General');
-      setNewTipOrder('1');
       setNewTipImageFile(null);
       setShowTipForm(false);
       setTipsMessage('Car tip added.');
@@ -376,14 +382,33 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const saveCarTipRow = async (tip) => {
+  const saveEditingTip = async () => {
+    if (!editingTipId) return;
+    if (!newTipTitle.trim() || !newTipBody.trim()) {
+      setTipsError('Tip title and content are required.');
+      return;
+    }
+    const existingTip = carTips.find((tip) => tip._id === editingTipId);
+    if (!existingTip) return;
     setTipsError('');
     setTipsMessage('');
-    setSavingTipId(tip._id);
+    setSavingTipId(editingTipId);
     try {
-      const updated = await updateCarTip(tip._id, tip);
+      const updated = await updateCarTip(editingTipId, {
+        ...existingTip,
+        title: newTipTitle.trim(),
+        body: newTipBody.trim(),
+        category: newTipCategory.trim() || 'General',
+        imageFile: newTipImageFile,
+      });
       setCarTips((prev) => prev.map((entry) => (entry._id === updated._id ? updated : entry)));
       setTipsMessage('Car tip updated.');
+      setEditingTipId('');
+      setNewTipTitle('');
+      setNewTipBody('');
+      setNewTipCategory('General');
+      setNewTipImageFile(null);
+      setShowTipForm(false);
     } catch (saveError) {
       setTipsError(saveError instanceof Error ? saveError.message : 'Could not update car tip.');
     } finally {
@@ -391,20 +416,61 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const removeCarTip = async (tip) => {
-    const okay = window.confirm(`Delete tip "${tip.title}"?`);
-    if (!okay) return;
+  const removeCarTip = async (tipId) => {
     setTipsError('');
     setTipsMessage('');
-    setSavingTipId(tip._id);
+    setSavingTipId(tipId);
     try {
-      await deleteCarTip(tip._id);
-      setCarTips((prev) => prev.filter((entry) => entry._id !== tip._id));
+      await deleteCarTip(tipId);
+      setCarTips((prev) => prev.filter((entry) => entry._id !== tipId));
       setTipsMessage('Car tip deleted.');
     } catch (deleteError) {
       setTipsError(deleteError instanceof Error ? deleteError.message : 'Could not delete car tip.');
     } finally {
       setSavingTipId('');
+    }
+  };
+
+  const openDeleteModal = (type, id, label) => {
+    setDeleteModal({
+      open: true,
+      type,
+      id,
+      label,
+      processing: false,
+    });
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteModal.processing) return;
+    setDeleteModal({
+      open: false,
+      type: '',
+      id: '',
+      label: '',
+      processing: false,
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.id || !deleteModal.type || deleteModal.processing) return;
+
+    setDeleteModal((prev) => ({ ...prev, processing: true }));
+    try {
+      if (deleteModal.type === 'stock') {
+        await removeItem(deleteModal.id, deleteModal.label);
+      } else if (deleteModal.type === 'tip') {
+        await removeCarTip(deleteModal.id);
+      }
+      setDeleteModal({
+        open: false,
+        type: '',
+        id: '',
+        label: '',
+        processing: false,
+      });
+    } catch {
+      setDeleteModal((prev) => ({ ...prev, processing: false }));
     }
   };
 
@@ -478,11 +544,6 @@ export default function AdminDashboardPage() {
             <h1>Operations Dashboard</h1>
           </div>
           <p>Track bookings, orders, and item listings from one place.</p>
-          <div className='admin-data-state'>
-            <button className='admin-refresh-btn' type='button' onClick={loadDashboardData} disabled={isLoading}>
-              {isLoading ? 'Refreshing...' : 'Refresh Data'}
-            </button>
-          </div>
           {error && <p className='admin-error-text'>{error}</p>}
         </header>
 
@@ -668,7 +729,6 @@ export default function AdminDashboardPage() {
                     type='button'
                     onClick={() => {
                       setNewPrimaryImageFile(null);
-                      setNewFeatureImageFile(null);
                       setNewOtherImageFiles([]);
                       setShowVehicleForm(true);
                       setShowCarPartForm(false);
@@ -690,7 +750,6 @@ export default function AdminDashboardPage() {
                   type='button'
                   onClick={() => {
                     setNewPrimaryImageFile(null);
-                    setNewFeatureImageFile(null);
                     setNewOtherImageFiles([]);
                     if (activePanel === 'car-parts') {
                       setShowCarPartForm(true);
@@ -755,7 +814,12 @@ export default function AdminDashboardPage() {
                           <button className='admin-refresh-btn' type='button' onClick={() => toggleSoldStatus(item)} disabled={savingItemId === item._id}>
                             {savingItemId === item._id ? 'Saving...' : item.soldOut ? 'Mark Available' : 'Mark Sold'}
                           </button>
-                          <button className='admin-refresh-btn danger' type='button' onClick={() => removeItem(item)} disabled={savingItemId === item._id}>
+                          <button
+                            className='admin-refresh-btn danger'
+                            type='button'
+                            onClick={() => openDeleteModal('stock', item._id, item.name || 'this item')}
+                            disabled={savingItemId === item._id}
+                          >
                             Delete
                           </button>
                         </div>
@@ -774,7 +838,12 @@ export default function AdminDashboardPage() {
                           <button className='admin-refresh-btn' type='button' onClick={() => toggleSoldStatus(item)} disabled={savingItemId === item._id}>
                             {savingItemId === item._id ? 'Saving...' : item.soldOut ? 'Mark Available' : 'Mark Sold'}
                           </button>
-                          <button className='admin-refresh-btn danger' type='button' onClick={() => removeItem(item)} disabled={savingItemId === item._id}>
+                          <button
+                            className='admin-refresh-btn danger'
+                            type='button'
+                            onClick={() => openDeleteModal('stock', item._id, item.name || 'this item')}
+                            disabled={savingItemId === item._id}
+                          >
                             Delete
                           </button>
                         </div>
@@ -803,7 +872,14 @@ export default function AdminDashboardPage() {
               <button
                 className='admin-refresh-btn'
                 type='button'
-                onClick={() => setShowTipForm(true)}
+                onClick={() => {
+                  setEditingTipId('');
+                  setNewTipTitle('');
+                  setNewTipBody('');
+                  setNewTipCategory('General');
+                  setNewTipImageFile(null);
+                  setShowTipForm(true);
+                }}
                 disabled={savingTipId === 'new'}
               >
                 Add Tip
@@ -821,7 +897,6 @@ export default function AdminDashboardPage() {
                 <tr>
                   <th>Title</th>
                   <th>Category</th>
-                  <th>Order</th>
                   <th>Image</th>
                   <th>Content</th>
                   <th>Action</th>
@@ -830,65 +905,37 @@ export default function AdminDashboardPage() {
               <tbody>
                 {carTips.map((tip) => (
                   <tr key={tip._id}>
-                    <td>
-                      <input
-                        type='text'
-                        value={tip.title}
-                        onChange={(event) =>
-                          setCarTips((prev) =>
-                            prev.map((entry) => (entry._id === tip._id ? { ...entry, title: event.target.value } : entry))
-                          )
-                        }
-                        disabled={savingTipId === tip._id}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type='text'
-                        value={tip.category}
-                        onChange={(event) =>
-                          setCarTips((prev) =>
-                            prev.map((entry) => (entry._id === tip._id ? { ...entry, category: event.target.value } : entry))
-                          )
-                        }
-                        disabled={savingTipId === tip._id}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type='number'
-                        min='1'
-                        value={tip.order}
-                        onChange={(event) =>
-                          setCarTips((prev) =>
-                            prev.map((entry) => (entry._id === tip._id ? { ...entry, order: event.target.value } : entry))
-                          )
-                        }
-                        disabled={savingTipId === tip._id}
-                      />
-                    </td>
+                    <td>{tip.title}</td>
+                    <td>{tip.category || 'General'}</td>
                     <td>
                       <div className='admin-tip-image-cell'>
                         {tip.imageUrl ? <img src={tip.imageUrl} alt={tip.title || 'Tip image'} /> : <span>No image</span>}
                       </div>
                     </td>
-                    <td>
-                      <textarea
-                        value={tip.body}
-                        onChange={(event) =>
-                          setCarTips((prev) =>
-                            prev.map((entry) => (entry._id === tip._id ? { ...entry, body: event.target.value } : entry))
-                          )
-                        }
-                        disabled={savingTipId === tip._id}
-                      />
-                    </td>
+                    <td>{tip.body ? `${tip.body.slice(0, 90)}${tip.body.length > 90 ? '...' : ''}` : '-'}</td>
                     <td>
                       <div className='admin-row-actions'>
-                        <button className='admin-refresh-btn' type='button' onClick={() => saveCarTipRow(tip)} disabled={savingTipId === tip._id}>
-                          {savingTipId === tip._id ? 'Saving...' : 'Save'}
+                        <button
+                          className='admin-refresh-btn'
+                          type='button'
+                          onClick={() => {
+                            setEditingTipId(tip._id);
+                            setNewTipTitle(tip.title || '');
+                            setNewTipBody(tip.body || '');
+                            setNewTipCategory(tip.category || 'General');
+                            setNewTipImageFile(null);
+                            setShowTipForm(true);
+                          }}
+                          disabled={savingTipId === tip._id}
+                        >
+                          Edit
                         </button>
-                        <button className='admin-refresh-btn danger' type='button' onClick={() => removeCarTip(tip)} disabled={savingTipId === tip._id}>
+                        <button
+                          className='admin-refresh-btn danger'
+                          type='button'
+                          onClick={() => openDeleteModal('tip', tip._id, tip.title || 'this tip')}
+                          disabled={savingTipId === tip._id}
+                        >
                           Delete
                         </button>
                       </div>
@@ -897,7 +944,7 @@ export default function AdminDashboardPage() {
                 ))}
                 {!tipsLoading && carTips.length === 0 && (
                   <tr>
-                    <td colSpan={6} className='empty-row'>
+                    <td colSpan={5} className='empty-row'>
                       No car tips yet.
                     </td>
                   </tr>
@@ -908,15 +955,15 @@ export default function AdminDashboardPage() {
         )}
       </main>
       {showTipForm && activePanel === 'car-tips' && (
-        <div className='admin-modal-overlay' onClick={() => (savingTipId === 'new' ? null : setShowTipForm(false))}>
+        <div className='admin-modal-overlay' onClick={() => (isTipSaving ? null : setShowTipForm(false))}>
           <div className='admin-modal-card' onClick={(event) => event.stopPropagation()}>
             <div className='admin-modal-head'>
-              <h3>Add Car Tip</h3>
+              <h3>{editingTipId ? 'Edit Car Tip' : 'Add Car Tip'}</h3>
               <button
                 type='button'
                 className='admin-modal-close'
                 onClick={() => setShowTipForm(false)}
-                disabled={savingTipId === 'new'}
+                disabled={isTipSaving}
                 aria-label='Close tip form'
               >
                 <i className='fas fa-times' />
@@ -931,29 +978,22 @@ export default function AdminDashboardPage() {
                   placeholder='Tip title'
                   value={newTipTitle}
                   onChange={(event) => setNewTipTitle(event.target.value)}
-                  disabled={savingTipId === 'new'}
+                  disabled={isTipSaving}
                 />
               </div>
               <div className='admin-modal-field'>
                 <label>Category</label>
-                <input
-                  type='text'
-                  placeholder='Category (e.g. Maintenance)'
+                <select
                   value={newTipCategory}
                   onChange={(event) => setNewTipCategory(event.target.value)}
-                  disabled={savingTipId === 'new'}
-                />
-              </div>
-              <div className='admin-modal-field'>
-                <label>Display Order</label>
-                <input
-                  type='number'
-                  min='1'
-                  placeholder='Display order'
-                  value={newTipOrder}
-                  onChange={(event) => setNewTipOrder(event.target.value)}
-                  disabled={savingTipId === 'new'}
-                />
+                  disabled={isTipSaving}
+                >
+                  {TIP_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className='admin-modal-field'>
                 <label>Image</label>
@@ -961,7 +1001,7 @@ export default function AdminDashboardPage() {
                   type='file'
                   accept='image/*'
                   onChange={(event) => setNewTipImageFile(event.target.files?.[0] || null)}
-                  disabled={savingTipId === 'new'}
+                  disabled={isTipSaving}
                 />
               </div>
               <div className='admin-modal-field'>
@@ -970,15 +1010,26 @@ export default function AdminDashboardPage() {
                   placeholder='Tip content'
                   value={newTipBody}
                   onChange={(event) => setNewTipBody(event.target.value)}
-                  disabled={savingTipId === 'new'}
+                  disabled={isTipSaving}
                 />
               </div>
             </div>
             <div className='admin-modal-actions'>
-              <button className='admin-refresh-btn' type='button' onClick={addCarTip} disabled={savingTipId === 'new'}>
-                {savingTipId === 'new' ? 'Adding...' : 'Add Tip'}
+              <button
+                className='admin-refresh-btn'
+                type='button'
+                onClick={editingTipId ? saveEditingTip : addCarTip}
+                disabled={isTipSaving}
+              >
+                {isTipSaving
+                  ? editingTipId
+                    ? 'Saving...'
+                    : 'Adding...'
+                  : editingTipId
+                  ? 'Save Changes'
+                  : 'Add Tip'}
               </button>
-              <button className='admin-refresh-btn' type='button' onClick={() => setShowTipForm(false)} disabled={savingTipId === 'new'}>
+              <button className='admin-refresh-btn' type='button' onClick={() => setShowTipForm(false)} disabled={isTipSaving}>
                 Cancel
               </button>
             </div>
@@ -1076,15 +1127,6 @@ export default function AdminDashboardPage() {
                 />
               </div>
               <div className='admin-modal-field'>
-                <label>Feature Image</label>
-                <input
-                  type='file'
-                  accept='image/*'
-                  onChange={(event) => setNewFeatureImageFile(event.target.files?.[0] || null)}
-                  disabled={savingItemId === 'new'}
-                />
-              </div>
-              <div className='admin-modal-field'>
                 <label>Other Images</label>
                 <input
                   type='file'
@@ -1173,15 +1215,6 @@ export default function AdminDashboardPage() {
                 />
               </div>
               <div className='admin-modal-field'>
-                <label>Feature Image</label>
-                <input
-                  type='file'
-                  accept='image/*'
-                  onChange={(event) => setNewFeatureImageFile(event.target.files?.[0] || null)}
-                  disabled={savingItemId === 'new'}
-                />
-              </div>
-              <div className='admin-modal-field'>
                 <label>Other Images</label>
                 <input
                   type='file'
@@ -1260,15 +1293,6 @@ export default function AdminDashboardPage() {
                 />
               </div>
               <div className='admin-modal-field'>
-                <label>Feature Image</label>
-                <input
-                  type='file'
-                  accept='image/*'
-                  onChange={(event) => setNewFeatureImageFile(event.target.files?.[0] || null)}
-                  disabled={savingItemId === 'new'}
-                />
-              </div>
-              <div className='admin-modal-field'>
                 <label>Other Images</label>
                 <input
                   type='file'
@@ -1284,6 +1308,35 @@ export default function AdminDashboardPage() {
                 {savingItemId === 'new' ? 'Adding...' : 'Add Accessories'}
               </button>
               <button className='admin-refresh-btn' type='button' onClick={() => setShowAccessoriesForm(false)} disabled={savingItemId === 'new'}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteModal.open && (
+        <div className='admin-modal-overlay' onClick={closeDeleteModal}>
+          <div className='admin-modal-card' onClick={(event) => event.stopPropagation()}>
+            <div className='admin-modal-head'>
+              <h3>Confirm Delete</h3>
+              <button
+                type='button'
+                className='admin-modal-close'
+                onClick={closeDeleteModal}
+                disabled={deleteModal.processing}
+                aria-label='Close delete confirmation'
+              >
+                <i className='fas fa-times' />
+              </button>
+            </div>
+            <p>
+              Delete "{deleteModal.label}"? This action cannot be undone.
+            </p>
+            <div className='admin-modal-actions'>
+              <button className='admin-refresh-btn danger' type='button' onClick={confirmDelete} disabled={deleteModal.processing}>
+                {deleteModal.processing ? 'Deleting...' : 'Delete'}
+              </button>
+              <button className='admin-refresh-btn' type='button' onClick={closeDeleteModal} disabled={deleteModal.processing}>
                 Cancel
               </button>
             </div>

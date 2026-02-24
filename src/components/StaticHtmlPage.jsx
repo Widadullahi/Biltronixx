@@ -82,6 +82,13 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
     images: [],
     index: 0,
   });
+  const [tipModal, setTipModal] = useState({
+    open: false,
+    title: '',
+    category: '',
+    body: '',
+    imageUrl: '',
+  });
 
   const styleTagId = useMemo(() => `page-style-${pageType}`, [pageType]);
 
@@ -458,6 +465,24 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
         });
       }
 
+      const tipSeeMoreBtn = target.closest('.tip-see-more');
+      if (tipSeeMoreBtn) {
+        event.preventDefault();
+        const tipCard = tipSeeMoreBtn.closest('.tip-card');
+        if (!(tipCard instanceof HTMLElement)) return;
+        const title = tipCard.querySelector('h3')?.textContent?.trim() || 'Car Tip';
+        const category = tipCard.querySelector('.tip-tag')?.textContent?.trim() || 'General';
+        const body = tipCard.querySelector('.tip-full')?.textContent?.trim() || tipCard.querySelector('p')?.textContent?.trim() || '';
+        const imageUrl = tipCard.querySelector('img')?.getAttribute('src') || '';
+        setTipModal({
+          open: true,
+          title,
+          category,
+          body,
+          imageUrl,
+        });
+      }
+
       const filterBtn = target.closest('[data-filter]');
       if (filterBtn instanceof HTMLElement) {
         const filterValue = filterBtn.getAttribute('data-filter');
@@ -493,11 +518,30 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       if (target.matches('[data-store-search]')) {
         applyStoreFilters();
       }
+      if (target.matches('[data-tip-search]') || target.matches('[data-tip-category-filter]')) {
+        const query =
+          root.querySelector('[data-tip-search]') instanceof HTMLInputElement
+            ? root.querySelector('[data-tip-search]').value.trim().toLowerCase()
+            : '';
+        const category =
+          root.querySelector('[data-tip-category-filter]') instanceof HTMLSelectElement
+            ? root.querySelector('[data-tip-category-filter]').value
+            : 'all';
+        root.querySelectorAll('[data-tip-card]').forEach((cardNode) => {
+          if (!(cardNode instanceof HTMLElement)) return;
+          const tipCategory = (cardNode.getAttribute('data-tip-category') || '').toLowerCase();
+          const text = (cardNode.textContent || '').toLowerCase();
+          const categoryMatch = category === 'all' || tipCategory === category;
+          const queryMatch = !query || text.includes(query);
+          cardNode.style.display = categoryMatch && queryMatch ? '' : 'none';
+        });
+      }
     };
 
     root.addEventListener('submit', onSubmit);
     root.addEventListener('click', onClick);
     root.addEventListener('input', onInput);
+    root.addEventListener('change', onInput);
 
     root.querySelectorAll('[data-install-app]').forEach((node) => {
       if (node instanceof HTMLElement) {
@@ -512,6 +556,57 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;');
+
+    const shuffle = (list) => {
+      const copy = [...list];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    };
+
+    const heroCarousel = root.querySelector('#heroCarsCarousel');
+    if (heroCarousel instanceof HTMLElement) {
+      const slideImages = Array.from(heroCarousel.querySelectorAll('.carousel-item img'));
+      const clearHeroImages = () => {
+        slideImages.forEach((imgNode, index) => {
+          if (imgNode instanceof HTMLImageElement) {
+            imgNode.removeAttribute('src');
+            imgNode.alt = `Store preview ${index + 1}`;
+          }
+        });
+      };
+
+      fetchStockItems(300)
+        .then((items) => {
+          if (!Array.isArray(items) || items.length === 0) {
+            clearHeroImages();
+            return;
+          }
+          const imagePool = items
+            .flatMap((item) => [item.primaryImageUrl, item.featureImageUrl, ...(item.otherImageUrls || [])])
+            .filter(Boolean);
+          const uniqueImages = Array.from(new Set(imagePool));
+          if (uniqueImages.length === 0) {
+            clearHeroImages();
+            return;
+          }
+
+          const randomImages = shuffle(uniqueImages);
+          slideImages.forEach((imgNode, index) => {
+            const nextImage = randomImages[index % randomImages.length];
+            if (imgNode instanceof HTMLImageElement && nextImage) {
+              imgNode.src = nextImage;
+              imgNode.alt = `Store preview ${index + 1}`;
+              imgNode.loading = 'lazy';
+            }
+          });
+        })
+        .catch(() => {
+          clearHeroImages();
+        });
+    }
 
     const storeHighlightsList = root.querySelector('[data-store-highlights-list]');
     if (storeHighlightsList instanceof HTMLElement) {
@@ -559,21 +654,62 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
 
     const tipsList = root.querySelector('[data-car-tips-list]');
     if (tipsList instanceof HTMLElement) {
+      const tipCategoryFilter = root.querySelector('[data-tip-category-filter]');
+      const applyTipFilters = () => {
+        const query =
+          root.querySelector('[data-tip-search]') instanceof HTMLInputElement
+            ? root.querySelector('[data-tip-search]').value.trim().toLowerCase()
+            : '';
+        const category =
+          root.querySelector('[data-tip-category-filter]') instanceof HTMLSelectElement
+            ? root.querySelector('[data-tip-category-filter]').value
+            : 'all';
+        root.querySelectorAll('[data-tip-card]').forEach((cardNode) => {
+          if (!(cardNode instanceof HTMLElement)) return;
+          const tipCategory = (cardNode.getAttribute('data-tip-category') || '').toLowerCase();
+          const text = (cardNode.textContent || '').toLowerCase();
+          const categoryMatch = category === 'all' || tipCategory === category;
+          const queryMatch = !query || text.includes(query);
+          cardNode.style.display = categoryMatch && queryMatch ? '' : 'none';
+        });
+      };
+
+      const trimWords = (input, limit = 24) => {
+        const words = String(input || '').trim().split(/\s+/).filter(Boolean);
+        if (words.length <= limit) return String(input || '').trim();
+        return `${words.slice(0, limit).join(' ')}...`;
+      };
+
       const renderTips = (tips) => {
         const safeTips = Array.isArray(tips) && tips.length > 0 ? tips : FALLBACK_CAR_TIPS;
         const tipMarkup = safeTips
           .map(
             (tip) => `
-              <article class="tip-card">
+              <article class="tip-card" data-tip-card data-tip-category="${escapeHtml(String(tip.category || 'General').toLowerCase())}">
                 ${tip.imageUrl ? `<img src="${escapeHtml(tip.imageUrl)}" alt="${escapeHtml(tip.title || 'Car tip image')}" />` : ''}
                 <span class="tip-tag">${escapeHtml(tip.category || 'General')}</span>
                 <h3>${escapeHtml(tip.title || 'Untitled Tip')}</h3>
-                <p>${escapeHtml(tip.body || '')}</p>
+                <p>${escapeHtml(trimWords(tip.body || '', 24))}</p>
+                <p class="tip-full" style="display:none;">${escapeHtml(tip.body || '')}</p>
+                <button type="button" class="tip-see-more">See More</button>
               </article>
             `
           )
           .join('');
         tipsList.innerHTML = tipMarkup;
+        if (tipCategoryFilter instanceof HTMLSelectElement) {
+          const categories = Array.from(
+            new Set(safeTips.map((tip) => String(tip.category || 'General').trim()).filter(Boolean))
+          );
+          const optionsMarkup = ['<option value="all">All Categories</option>']
+            .concat(
+              categories.map((item) => `<option value="${escapeHtml(item.toLowerCase())}">${escapeHtml(item)}</option>`)
+            )
+            .join('');
+          tipCategoryFilter.innerHTML = optionsMarkup;
+          tipCategoryFilter.value = 'all';
+        }
+        applyTipFilters();
       };
 
       fetchCarTips(6)
@@ -619,17 +755,20 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
           .map((item) => {
             const normalizedCategory = categoryMap[item.category] || 'part';
             const allImages = [item.primaryImageUrl, item.featureImageUrl, ...(item.otherImageUrls || [])].filter(Boolean);
-            const imageSrc = allImages[0] || 'https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=1000&q=80';
+            const imageSrc = allImages[0] || '';
+            const imageMarkup = imageSrc
+              ? `<img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(item.name || 'Product image')}" />`
+              : `<div style="height:230px;display:grid;place-items:center;background:#f7f9ff;border-bottom:1px solid #e3ebf8;color:#61779a;font-weight:600;">No image uploaded</div>`;
             const extraImages = allImages.slice(1).join(',');
             const detailsLabel = item.category === 'car-parts' ? 'Details' : 'Details';
             const soldBadge = item.soldOut ? '<span class="badge" style="margin-left:6px;background:#fde2e2;color:#8e1f1f;border-color:#f4c2ca;">Sold</span>' : '';
             const detailsButton = `<a class="btn details view-details" href="#">${detailsLabel}</a>`;
             const inquireButton = item.soldOut
-              ? ''
+              ? '<span class="btn" style="background:#f3f6fb;color:#6b7f9f;border:1px solid #d9e3f2;cursor:not-allowed;">Sold Out</span>'
               : `<a class="btn whatsapp" target="_blank" href="https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`I want to inquire about ${item.name}`)}">Inquire</a>`;
             return `
               <article class="product-card" data-product-card data-category="${normalizedCategory}" data-images="${escapeHtml(extraImages)}">
-                <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(item.name || 'Product image')}" />
+                ${imageMarkup}
                 <div class="product-body">
                   <span class="badge">${escapeHtml(toSafeCategoryLabel(item.category))}</span>
                   ${soldBadge}
@@ -707,6 +846,7 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
       root.removeEventListener('submit', onSubmit);
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
+      root.removeEventListener('change', onInput);
       cleanupTasks.forEach((fn) => fn());
     };
   }, [parts.bodyHtml]);
@@ -858,6 +998,44 @@ export default function StaticHtmlPage({ htmlPath, pageType }) {
                 <li>Support available for fitment guidance</li>
               </ul>
             </div>
+          </div>
+        </div>
+      )}
+      {tipModal.open && (
+        <div
+          className='tip-detail-overlay'
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='tip-detail-title'
+          onClick={() =>
+            setTipModal((prev) => ({
+              ...prev,
+              open: false,
+            }))
+          }
+        >
+          <div className='tip-detail-card' onClick={(event) => event.stopPropagation()}>
+            <button
+              type='button'
+              className='tip-detail-close'
+              onClick={() =>
+                setTipModal((prev) => ({
+                  ...prev,
+                  open: false,
+                }))
+              }
+              aria-label='Close tip details'
+            >
+              x
+            </button>
+            {tipModal.imageUrl ? (
+              <img src={tipModal.imageUrl} alt={tipModal.title || 'Car tip'} />
+            ) : (
+              <div className='tip-detail-noimage'>No image available</div>
+            )}
+            <span className='tip-detail-badge'>{tipModal.category || 'General'}</span>
+            <h3 id='tip-detail-title'>{tipModal.title}</h3>
+            <p>{tipModal.body}</p>
           </div>
         </div>
       )}
