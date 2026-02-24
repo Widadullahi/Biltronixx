@@ -39,8 +39,8 @@ const VEHICLE_TRANSMISSIONS = ['Automatic', 'Manual'];
 const VEHICLE_FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TIP_CATEGORIES = ['General', 'Maintenance', 'Safety', 'Engine Care', 'Performance', 'Buying Guide'];
 
-const ADMIN_LOGIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || 'biltronixtech@gmail.com').trim().toLowerCase();
-const ADMIN_LOGIN_PASSWORD = String(import.meta.env.VITE_ADMIN_PASSWORD || 'password');
+const ADMIN_LOGIN_EMAIL = String(import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
+const ADMIN_LOGIN_PASSWORD = String(import.meta.env.VITE_ADMIN_PASSWORD || '');
 const ADMIN_SESSION_KEY = 'biltronix_admin_authenticated';
 
 const naira = new Intl.NumberFormat('en-NG', {
@@ -500,6 +500,11 @@ export default function AdminDashboardPage() {
   const handleAdminLogin = (event) => {
     event.preventDefault();
     const normalizedEmail = loginEmail.trim().toLowerCase();
+
+    if (!ADMIN_LOGIN_EMAIL || !ADMIN_LOGIN_PASSWORD) {
+      setLoginError('Admin credentials are not configured. Set VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD.');
+      return;
+    }
 
     if (normalizedEmail === ADMIN_LOGIN_EMAIL && loginPassword === ADMIN_LOGIN_PASSWORD) {
       sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
