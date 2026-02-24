@@ -10,7 +10,8 @@
     :root {
       --blue: #13315f;
       --blue-2: #0f2444;
-      --red: #ef233c;
+      --accent: #2a5ea8;
+      --red: #2a5ea8;
       --ink: #1b263b;
       --soft: #f6f9ff;
       --line: #dfe7f3;
@@ -69,11 +70,11 @@
       gap: 8px;
     }
 
-    .brand span { color: var(--red); }
+    .brand span { color: var(--accent); }
 
     .brand-logo {
-      width: 34px;
-      height: 34px;
+      width: 42px;
+      height: 42px;
       border-radius: 8px;
       object-fit: cover;
       border: 1px solid var(--line);
@@ -83,35 +84,38 @@
 
     .nav-links a {
       text-decoration: none;
-      color: #0f2747;
+      color: var(--blue);
       font-weight: 700;
       padding: 9px 12px;
       border-radius: 999px;
       border: 1px solid #d5e1f2;
-      background: #f8fbff;
+      background: #fff;
       box-shadow: 0 6px 14px rgba(15, 39, 71, 0.08);
       transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
     }
 
     .nav-links a:hover {
       transform: translateY(-1px);
-      background: #eef5ff;
+      background: rgba(42, 94, 168, 0.08);
       box-shadow: 0 10px 18px rgba(15, 39, 71, 0.13);
     }
 
     .nav-links a.install {
       color: #fff;
-      background: linear-gradient(135deg, #0b8f6f, #0ba77f);
-      border-color: rgba(9, 122, 97, 0.7);
-      box-shadow: 0 10px 20px rgba(11, 159, 121, 0.32);
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      border-color: rgba(19, 49, 95, 0.9);
+      box-shadow: 0 10px 20px rgba(19, 49, 95, 0.32);
     }
 
     .nav-links a.install:hover {
-      background: linear-gradient(135deg, #0a8265, #0a9974);
-      box-shadow: 0 14px 24px rgba(11, 159, 121, 0.4);
+      background: linear-gradient(135deg, #214f8f, #0f2444);
+      box-shadow: 0 14px 24px rgba(19, 49, 95, 0.4);
     }
 
-    .nav-links a.cta { background: var(--red); color: #fff; }
+    .nav-links a.cta {
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      color: #fff;
+    }
 
     .hero {
       padding: 26px 0;
@@ -286,7 +290,16 @@
         align-items: stretch;
         gap: 8px;
       }
-      .brand { font-size: 1.05rem; }
+      .brand {
+        font-size: 1.14rem;
+        font-weight: 900;
+        letter-spacing: 0.01em;
+      }
+      .brand-logo {
+        width: 46px;
+        height: 46px;
+        border: 1px solid rgba(19, 49, 95, 0.25);
+      }
       .brand { justify-content: center; }
       .nav-links {
         width: 100%;

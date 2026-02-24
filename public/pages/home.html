@@ -10,7 +10,8 @@
     :root {
       --blue: #14305f;
       --blue-2: #0f2444;
-      --red: #ef233c;
+      --accent: #2a5ea8;
+      --red: #2a5ea8;
       --ink: #1b263b;
       --soft: #f6f9ff;
       --surface: #f8fbff;
@@ -74,11 +75,11 @@
       gap: 8px;
     }
 
-    .brand span { color: var(--red); }
+    .brand span { color: var(--accent); }
 
     .brand-logo {
-      width: 34px;
-      height: 34px;
+      width: 42px;
+      height: 42px;
       border-radius: 8px;
       object-fit: cover;
       border: 1px solid var(--line);
@@ -88,39 +89,39 @@
 
     .nav-links a {
       text-decoration: none;
-      color: #0f2747;
+      color: var(--blue);
       font-weight: 700;
       padding: 9px 12px;
       border-radius: 999px;
       border: 1px solid #d5e1f2;
-      background: var(--surface);
+      background: #fff;
       box-shadow: var(--shadow-soft);
       transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
     }
 
     .nav-links a:hover {
       transform: translateY(-1px);
-      background: #eef5ff;
+      background: rgba(42, 94, 168, 0.08);
       box-shadow: 0 10px 18px rgba(15, 39, 71, 0.13);
     }
 
     .nav-links a.install {
       color: #fff;
-      background: linear-gradient(135deg, #2b66b1, #14305f);
-      border-color: rgba(20, 48, 95, 0.7);
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      border-color: rgba(20, 48, 95, 0.9);
       box-shadow: 0 10px 20px rgba(20, 48, 95, 0.3);
     }
 
     .nav-links a.install:hover {
-      background: linear-gradient(135deg, #25589a, #112b56);
+      background: linear-gradient(135deg, #214f8f, #112b56);
       box-shadow: 0 14px 24px rgba(20, 48, 95, 0.38);
     }
 
     .nav-links a.cta {
-      background: linear-gradient(135deg, #ef233c, #c6142d);
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
       color: #fff;
-      border-color: #bf1430;
-      box-shadow: 0 10px 20px rgba(239, 35, 60, 0.3);
+      border-color: rgba(20, 48, 95, 0.9);
+      box-shadow: 0 10px 20px rgba(20, 48, 95, 0.3);
     }
 
     .hero {
@@ -164,7 +165,7 @@
       font-weight: 700;
     }
 
-    .btn.primary { background: var(--red); color: #fff; }
+    .btn.primary { background: var(--blue); color: #fff; }
     .btn.secondary { background: var(--surface-2); color: var(--blue); border: 1px solid var(--line); }
 
     .hero-media {
@@ -580,6 +581,13 @@
       filter: grayscale(10%);
     }
 
+    .brand-track img.range-rover-logo {
+      height: 52px;
+      max-width: 185px;
+      opacity: 1;
+      filter: none;
+    }
+
     .brand-track img:hover {
       opacity: 1;
       transform: translateY(-2px);
@@ -666,7 +674,16 @@
 
     @media (max-width: 620px) {
       .topbar { font-size: 0.82rem; }
-      .brand { font-size: 1.06rem; }
+      .brand {
+        font-size: 1.16rem;
+        font-weight: 900;
+        letter-spacing: 0.01em;
+      }
+      .brand-logo {
+        width: 46px;
+        height: 46px;
+        border: 1px solid rgba(20, 48, 95, 0.25);
+      }
       .nav-inner {
         min-height: auto;
         padding: 8px 0;
@@ -975,7 +992,7 @@
           <div class="carousel-inner">
             <div class="carousel-item active">
               <div class="brand-track">
-                <img src="https://cdn.simpleicons.org/landrover/1c2f5e" alt="Range Rover" />
+                <img class="range-rover-logo" src="https://www.carlogos.org/car-logos/land-rover-logo.png" alt="Range Rover" />
                 <img src="https://cdn.simpleicons.org/porsche/1c2f5e" alt="Porsche" />
                 <img src="https://cdn.simpleicons.org/rollsroyce/1c2f5e" alt="Rolls-Royce" />
                 <img src="https://cdn.simpleicons.org/bentley/1c2f5e" alt="Bentley" />
